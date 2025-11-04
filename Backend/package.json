@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "type" : "module",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node --watch server.js"
@@ -13,6 +13,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.16.1",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "cloudinary": "^2.8.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",

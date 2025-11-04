@@ -1,7 +1,10 @@
 import express from "express";
 import "dotenv/config";
+import userRouter from "./routes/userRoute.js";
 import { connectMongoDB } from "./config/mongodb.js";
 import { connectCloudinary } from "./config/cloudinary.js";
+
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -30,7 +33,7 @@ connectCloudinary().then(()=> console.log("Cloudinary Connected!!"));
 
 
 // api endpoints
-
+app.use("/api/user", userRouter); 
 
 
 app.get('/health', (req, res) => {

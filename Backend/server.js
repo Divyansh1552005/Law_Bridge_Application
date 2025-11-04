@@ -1,6 +1,7 @@
 import express from "express";
 import "dotenv/config";
-
+import { connectMongoDB } from "./config/mongodb.js";
+import { connectCloudinary } from "./config/cloudinary.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,8 +25,8 @@ app.use(express.json());
 //   })
 // );
 
-// connectMongoDB(process.env.MONGODB_URI).then(()=> console.log("Mongo DB Connected!!"));
-// connectCloudinary().then(()=> console.log("Cloudinary Connected!!"));
+connectMongoDB(process.env.MONGODB_URI).then(()=> console.log("Mongo DB Connected!!"));
+connectCloudinary().then(()=> console.log("Cloudinary Connected!!"));
 
 
 // api endpoints

@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
-const lawyerSchema = new mongoose.Schema({
+const lawyerSchema = new mongoose.Schema(
+  {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
@@ -13,11 +14,17 @@ const lawyerSchema = new mongoose.Schema({
     available: { type: Boolean, default: true },
     fees: { type: Number, required: true },
     slots_booked: { type: Object, default: {} },
-    address: { type: Object, required: true },
+    address: {
+      Location: { type: String, default: "" },
+      City: { type: String, default: "" },
+      State: { type: String, default: "" },
+    },
     date: { type: Number, required: true },
-}, { minimize: false })
+  },
+  { minimize: false }
+);
 
 // Create a model using the schema, also || statement is for ki if model already exists use that
-const lawyerModel = mongoose.models.lawyer || mongoose.model("lawyer", lawyerSchema);
+const lawyerModel =
+  mongoose.models.lawyer || mongoose.model("lawyer", lawyerSchema);
 export default lawyerModel;
-

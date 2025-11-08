@@ -81,36 +81,39 @@ export const updatePatchRequestBodySchemaForLawyer = z.object({
 // schema for adding lawyer by admin
 export const addLawyerByAdminSchema = z.object({
   name: z
-    .string({ required_error: "Name is required" })
-    .min(1, "Name cannot be empty"),
+    .string()
+    .min(1, "Name cannot be empty")
+    .describe("Name is required"),
 
   email: z
-    .string({ required_error: "Email is required" })
-    .email("Invalid email format"),
+    .string()
+    .email("Invalid email format")
+    .describe("Email is required"),
 
   password: z
-    .string({ required_error: "Password is required" })
-    .min(6, "Password must be at least 6 characters long"),
-
-  image: z
-    .string({ required_error: "Image URL is required" })
-    .min(1, "Image URL cannot be empty"),
+    .string()
+    .min(6, "Password must be at least 6 characters long")
+    .describe("Password is required"),
 
   speciality: z
-    .string({ required_error: "Speciality is required" })
-    .min(1, "Speciality cannot be empty"),
+    .string()
+    .min(1, "Speciality cannot be empty")
+    .describe("Speciality is required"),
 
   degree: z
-    .string({ required_error: "Degree is required" })
-    .min(1, "Degree cannot be empty"),
+    .string()
+    .min(1, "Degree cannot be empty")
+    .describe("Degree is required"),
 
   experience: z
-    .string({ required_error: "Experience is required" })
-    .min(1, "Experience cannot be empty"),
+    .string()
+    .min(1, "Experience cannot be empty")
+    .describe("Experience is required"),
 
   about: z
-    .string({ required_error: "About section is required" })
-    .min(1, "About cannot be empty"),
+    .string()
+    .min(1, "About cannot be empty")
+    .describe("About section is required"),
 
   fees: z
     .union([z.string(), z.number()])
@@ -119,12 +122,9 @@ export const addLawyerByAdminSchema = z.object({
 
   address: z
     .object({
-      line1: z.string({ required_error: "Address line1 is required" }),
-      line2: z.string().optional(),
-      city: z.string({ required_error: "City is required" }),
-      state: z.string({ required_error: "State is required" }),
-      pincode: z.string({ required_error: "Pincode is required" }),
+      Location: z.string().min(1, "Location is required"),
+      City: z.string().min(1, "City is required"),
+      State: z.string().min(1, "State is required"),
     })
-    .required({ required_error: "Address object is required" }),
+    .describe("Address object is required"),
 });
-    

@@ -174,8 +174,24 @@ export const updateUserProfile = async (req, res) => {
     if (phone !== undefined) updates.phone = phone;
     if (dob !== undefined) updates.dob = dob;
     if (gender !== undefined) updates.gender = gender;
-    if (address !== undefined) updates.address = JSON.parse(address);
+    
+    // Handle address parsing if it's a string
+    if (address !== undefined) {
+      if (typeof address === 'string') {
+        try {
+          updates.address = JSON.parse(address);
+        } catch (error) {
+          return res.status(400).json({
+            success: false,
+            message: "Invalid address format. Address must be a valid JSON object"
+          });
+        }
+      } else {
+        updates.address = address;
+      }
+    }
 
+    // Handle image upload if present
     if (req.file) {
       const uploadResult = await cloudinary.uploader.upload(req.file.path, {
         resource_type: "image",

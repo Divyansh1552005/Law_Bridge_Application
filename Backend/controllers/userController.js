@@ -332,7 +332,7 @@ export const cancelAppointment = async (req, res) => {
     }
 
     await appointmentModel.findByIdAndUpdate(appointmentId, {
-      cancelled: true,
+      cancelled: "Cancelled by User",
     });
 
     // releasing lawyer slot coz appointment cancelled

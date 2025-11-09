@@ -5,4 +5,3 @@ export const TokenSchema = z.object({
     id: z.string(),
 
 });
-

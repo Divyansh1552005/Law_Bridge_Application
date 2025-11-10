@@ -222,7 +222,7 @@ export const adminDashboard = async (req, res) => {
     try {
 
         const lawyers = await lawyerModel.find({})
-        const users = await UserModelserModel.find({})
+        const users = await UserModel.find({})
         const appointments = await appointmentModel.find({})
 
         // console.log(appointments);

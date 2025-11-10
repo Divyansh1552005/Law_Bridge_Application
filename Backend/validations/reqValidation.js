@@ -62,8 +62,9 @@ export const updatePatchRequestBodySchemaForLawyer = z.object({
     .union([
       z.string(), // for FormData cases
       z.object({
-        line1: z.string().optional(),
-        line2: z.string().optional(),
+        Location: z.string().optional(),
+        City: z.string().optional(),
+        State: z.string().optional(),
       }),
     ])
     .optional(),
@@ -128,3 +129,4 @@ export const addLawyerByAdminSchema = z.object({
     })
     .describe("Address object is required"),
 });
+

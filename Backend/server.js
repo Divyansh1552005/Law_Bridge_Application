@@ -2,6 +2,7 @@ import express from "express";
 import "dotenv/config";
 import userRouter from "./routes/userRoute.js";
 import adminRouter from "./routes/adminRoute.js";
+import LawyerRouter from "./routes/lawyerRoute.js";
 import { connectMongoDB } from "./config/mongodb.js";
 import { connectCloudinary } from "./config/cloudinary.js";
 
@@ -36,6 +37,8 @@ connectCloudinary().then(()=> console.log("Cloudinary Connected!!"));
 // api endpoints
 app.use("/api/user", userRouter); 
 app.use("/api/admin", adminRouter);
+app.use("/api/lawyer", LawyerRouter);
+
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: "ok", time: new Date().toISOString() });

@@ -5,7 +5,7 @@ import { changeAvailability, getLawyerList, lawyerLogin, cancelAppointmentByLawy
 const LawyerRouter = express.Router();
 
 LawyerRouter.post('/change-availability', authLawyer, changeAvailability);
-LawyerRouter.get('/lawyer-list', getLawyerList);
+LawyerRouter.get('/list', getLawyerList);
 LawyerRouter.post('/login', lawyerLogin);
 LawyerRouter.post('/cancel-appointment', authLawyer, cancelAppointmentByLawyer);
 LawyerRouter.post('/complete-appointment', authLawyer, appointmentCompletedByLawyer);

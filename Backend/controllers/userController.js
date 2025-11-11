@@ -367,7 +367,7 @@ export const paymentRazorpay = async (req, res) => {
     const { appointmentId } = req.body;
     const appointmentData = await appointmentModel.findById(appointmentId);
 
-    if (!appointmentData || appointmentData.cancelled){
+    if (!appointmentData || (appointmentData.cancelled && appointmentData.cancelled !== "Not Cancelled")){
       return res
         .status(400)
         .json({

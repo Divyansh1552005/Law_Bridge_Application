@@ -1,5 +1,6 @@
 import express from "express";
 import "dotenv/config";
+import cors from "cors";
 import userRouter from "./routes/userRoute.js";
 import adminRouter from "./routes/adminRoute.js";
 import LawyerRouter from "./routes/lawyerRoute.js";
@@ -13,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 
 // json middleware
 app.use(express.json());
-
+app.use(cors());
 
 // const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",");
 

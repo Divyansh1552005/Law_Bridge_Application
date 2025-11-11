@@ -171,7 +171,7 @@ export const appointmentCompletedByLawyer = async (req, res) => {
             return res.status(400).json({ success: false, message: "Lawyer ID and Appointment ID are required" })
         }
 
-        const appointmentData = await appointmentModel.findOne(appointmentId);
+        const appointmentData = await appointmentModel.findById(appointmentId);
 
         if (appointmentData && appointmentData.lawyerId === lawyerId) {
             await appointmentModel.findByIdAndUpdate(appointmentId, { isCompleted: true })
@@ -202,7 +202,7 @@ export const getLawyerProfile = async (req, res) => {
             return res.status(404).json({ success: false, message: "Lawyer not found" })
         }
 
-        res.status(200).json({ success: true, lawyer });
+        res.status(200).json({ success: true, profileData: lawyer });
         
     }catch(error){
         console.log(error)
@@ -327,11 +327,11 @@ export const lawyerDashboard = async (req, res) => {
         const dashboardData = {
             earnings, 
             appointments: appointments.length,
-            clients: users.length,
+            patients: users.length,
             latestAppointments: appointments.reverse()
         }
 
-        res.status(200).json({ success: true, dashboardData})
+        res.status(200).json({ success: true, dashData: dashboardData})
 
     }catch(error){
         res.status(500).json({ success: false, message: error.message })

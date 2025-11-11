@@ -1,16 +1,57 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useContext } from 'react'
+import { LawyerContext } from './context/LawyerContext';
+import { AdminContext } from './context/AdminContext';
+import { Route, Routes } from 'react-router-dom'
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Navbar from './components/Navbar'
+import Sidebar from './components/Sidebar'
+import Dashboard from './pages/Admin/Dashboard';
+import AllAppointments from './pages/Admin/AllAppointments';
+import AddLawyer from './pages/Admin/AddLawyer.jsx';
+import LawyerList from './pages/Admin/LawyerList.jsx';
+import Login from './pages/Login';
+import LawyerAppointments from './pages/Lawyer/LawyerAppointments';
+import LawyerDashboard from './pages/Lawyer/LawyerDashboard';
+import LawyerProfile from './pages/Lawyer/LawyerProfile';
+
 
 function App() {
-  const [count, setCount] = useState(0)
+  const adminContext = useContext(AdminContext);
+  const lawyerContext = useContext(LawyerContext);
+  
+  const aToken = adminContext?.aToken;
+  const lToken = lawyerContext?.lToken;
 
-  return (
+  return aToken || lToken ? (
+    <div className='bg-[#F8F9FD]'>
+      {/* <Login /> */}
+      
+      
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="colored"/>
+      <Navbar />
+      <div className="flex items-start">
+      <Sidebar />
+       <Routes>
+          <Route path='/' element={<></>} />
+          <Route path='/admin-dashboard' element={<Dashboard />} />
+          <Route path='/all-appointments' element={<AllAppointments />} />
+          <Route path='/add-lawyer' element={<AddLawyer />} />
+          <Route path='/lawyer-list' element={<LawyerList />} />
+          <Route path='/lawyer-dashboard' element={<LawyerDashboard />} />
+          <Route path='/lawyer-appointments' element={<LawyerAppointments />} />
+          <Route path='/lawyer-profile' element={<LawyerProfile />} />
+        </Routes>
+
+        </div>
+    </div>
+  ):(
     <>
-     <h1 className="text-3xl font-bold bg-amber-200">Welcome to Lawbridge</h1>
+      <Login />
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="colored"/>
     </>
   )
 }
 
 export default App
+

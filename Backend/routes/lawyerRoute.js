@@ -9,10 +9,10 @@ LawyerRouter.get('/list', getLawyerList);
 LawyerRouter.post('/login', lawyerLogin);
 LawyerRouter.post('/cancel-appointment', authLawyer, cancelAppointmentByLawyer);
 LawyerRouter.post('/complete-appointment', authLawyer, appointmentCompletedByLawyer);
-LawyerRouter.get('/get-profile', authLawyer, getLawyerProfile);
+LawyerRouter.get('/profile', authLawyer, getLawyerProfile);
 LawyerRouter.patch('/update-profile', authLawyer, updateLawyerProfile);
 LawyerRouter.get('/dashboard', authLawyer, lawyerDashboard);
-LawyerRouter.get("/lawyer-appointments", authLawyer, getLawyerAppointments);
+LawyerRouter.get("/appointments", authLawyer, getLawyerAppointments);
 
 
 export default LawyerRouter;

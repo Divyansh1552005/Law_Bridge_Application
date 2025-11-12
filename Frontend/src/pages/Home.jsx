@@ -1,17 +1,16 @@
 import React from 'react'
 import Header from '../components/Header.jsx'
-import SpecialityMenu from '../components/SpecialityMenu.jsx'
 import TopLawyers from '../components/TopLawyers.jsx'
-import Banner from '../components/Banner.jsx'
-
+import Features from '../components/Features.jsx'
+import Faq from '../components/Faq.jsx'
 
 const Home = () => {
   return (
     <div>
       <Header />
-      <SpecialityMenu />
+      <Features />
       <TopLawyers />
-      <Banner />
+      <Faq />
     </div>
   )
 }

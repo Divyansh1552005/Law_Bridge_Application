@@ -15,6 +15,8 @@ import RefundPolicy from './pages/RefundPolicy.jsx'
 import ContactUs from './pages/ContactUs.jsx'
 import Navbar from './components/Navbar.jsx'
 import Footer from './components/Footer.jsx'
+import Chatbot from './pages/Chatbot.jsx'
+import Resources from './pages/Resources.jsx'
 import {ToastContainer, toast} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -40,6 +42,8 @@ function App() {
         <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
         <Route path="/refund-policy" element={<RefundPolicy />} />
         <Route path="/contact-us" element={<ContactUs />} />
+        <Route path="/chatbot" element={<Chatbot />} />
+        <Route path="/resources" element={<Resources />} />
 
       </Routes>
 

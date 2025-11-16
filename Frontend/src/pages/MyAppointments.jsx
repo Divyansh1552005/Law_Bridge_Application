@@ -264,7 +264,9 @@ const MyAppointments = () => {
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                                     </svg>
-                                                    {item.lawyerData.address.line1}, {item.lawyerData.address.line2}
+                                                    {item.lawyerData.address?.Location && item.lawyerData.address?.City 
+                                                        ? `${item.lawyerData.address.Location}, ${item.lawyerData.address.City}, ${item.lawyerData.address.State}` 
+                                                        : 'Virtual Consultation'}
                                                 </p>
                                             </div>
                                         </div>
@@ -272,7 +274,7 @@ const MyAppointments = () => {
                                 </div>
 
                                 {/* Action Buttons */}
-                                <div className='sm:w-48 flex-shrink-0 flex flex-col gap-3 justify-center'>
+                                <div className='sm:w-48 shrink-0 flex flex-col gap-3 justify-center'>
                                     {!isAppointmentCancelled(item) && !item.payment && !item.isCompleted && (
                                         <>
                                             {payment !== item._id ? (

@@ -15,14 +15,33 @@ const VideoCall = () => {
   const [client, setClient] = useState(null);
   const [call, setCall] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isCallEnded, setIsCallEnded] = useState(false);
 
   useEffect(() => {
-    initializeCall();
+    let mounted = true;
+    
+    const initCall = async () => {
+      if (mounted && !isCallEnded) {
+        await initializeCall();
+      }
+    };
+    
+    initCall();
     
     return () => {
-      // Cleanup on unmount
-      if (call) {
-        handleLeaveCall();
+      mounted = false;
+      // Simple cleanup without calling handleLeaveCall to avoid loops
+      if (call && !isCallEnded) {
+        try {
+          // Remove specific event handlers
+          if (call._eventHandlers) {
+            call.off('call.ended', call._eventHandlers.handleCallEnded);
+            call.off('call.session_ended', call._eventHandlers.handleSessionEnded);
+          }
+          call.leave();
+        } catch (error) {
+          console.log('Cleanup error:', error);
+        }
       }
     };
   }, [appointmentId]);
@@ -57,6 +76,31 @@ const VideoCall = () => {
       // Join the call (create if doesn't exist)
       const streamCall = streamClient.call('default', data.callId);
       await streamCall.join({ create: true });
+
+      // Add event listeners for call events
+      const handleCallEnded = () => {
+        console.log('Call ended by another participant');
+        setIsCallEnded(true);
+        setTimeout(() => {
+          toast.info('Call ended by lawyer');
+          navigate('/my-appointments');
+        }, 100);
+      };
+
+      const handleSessionEnded = () => {
+        console.log('Call session ended');
+        setIsCallEnded(true);
+        setTimeout(() => {
+          toast.info('Call session ended');
+          navigate('/my-appointments');
+        }, 100);
+      };
+
+      streamCall.on('call.ended', handleCallEnded);
+      streamCall.on('call.session_ended', handleSessionEnded);
+
+      // Store event handlers for cleanup
+      streamCall._eventHandlers = { handleCallEnded, handleSessionEnded };
 
       setClient(streamClient);
       setCall(streamCall);
@@ -106,6 +150,16 @@ const VideoCall = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-gray-600">Connecting to video call...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isCallEnded) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-gray-600">Call ended. Redirecting...</p>
         </div>
       </div>
     );

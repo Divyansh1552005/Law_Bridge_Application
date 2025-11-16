@@ -102,7 +102,8 @@ const LawyerVideoCall = () => {
   const handleEndCall = async () => {
     try {
       if (call) {
-        await call.leave();
+        // End the call for all participants
+        await call.endCall();
       }
       
       const lToken = localStorage.getItem('lToken');

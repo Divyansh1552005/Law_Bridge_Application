@@ -15,6 +15,7 @@ const LawyerVideoCall = () => {
   const [client, setClient] = useState(null);
   const [call, setCall] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [connectionStatus, setConnectionStatus] = useState('connecting');
 
   useEffect(() => {
     initializeCall();
@@ -59,6 +60,7 @@ const LawyerVideoCall = () => {
 
       setClient(streamClient);
       setCall(streamCall);
+      setConnectionStatus('connected');
       setLoading(false);
 
       // Update call status to joined
@@ -136,33 +138,90 @@ const LawyerVideoCall = () => {
   }
 
   return (
-    <div className="h-screen bg-gray-900">
+    <div className="h-screen bg-gray-900 flex flex-col">
       <StreamVideo client={client}>
         <StreamCall call={call}>
-          <div className="flex flex-col h-full">
-            {/* Video Layout */}
-            <div className="flex-1 relative">
-              <SpeakerLayout />
+          {/* Header */}
+          <div className="bg-gray-800 px-6 py-4 flex items-center justify-between border-b border-gray-700">
+            <div className="flex items-center space-x-3">
+              <div className={`w-3 h-3 rounded-full ${
+                connectionStatus === 'connected' ? 'bg-green-500' : 
+                connectionStatus === 'connecting' ? 'bg-yellow-500 animate-pulse' : 'bg-red-500'
+              }`}></div>
+              <h1 className="text-white font-semibold">Client Consultation</h1>
+              <span className="bg-blue-600 text-white px-2 py-1 rounded-md text-xs font-medium">
+                LAWYER
+              </span>
+              <span className="text-xs px-2 py-1 bg-gray-700 text-gray-300 rounded-md">
+                {connectionStatus === 'connected' ? 'Connected' : 
+                 connectionStatus === 'connecting' ? 'Connecting...' : 'Disconnected'}
+              </span>
             </div>
+            <div className="text-gray-300 text-sm">
+              ID: {appointmentId.slice(-6).toUpperCase()}
+            </div>
+          </div>
 
-            {/* Call Controls */}
-            <div className="bg-gray-800 py-4">
-              <div className="flex justify-center gap-4">
-                <CallControls onLeave={handleLeaveCall} />
-                
-                {/* Custom End Call for All Button */}
-                <button
-                  onClick={handleEndCall}
-                  className="px-6 py-3 bg-red-600 text-white rounded-md hover:bg-red-700"
-                >
-                  End Call for All
-                </button>
+          <div className="flex-1 flex flex-col relative">
+            {/* Video Layout */}
+            <div className="flex-1 relative bg-black">
+              <SpeakerLayout />
+              
+              {/* Floating Participants Panel */}
+              <div className="absolute top-4 right-4 bg-gray-800/90 rounded-lg p-3 max-w-xs backdrop-blur-sm">
+                <div className="text-white text-sm font-medium mb-2 flex items-center">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                  </svg>
+                  Participants
+                </div>
+                <CallParticipantsList onClose={() => {}} />
               </div>
             </div>
 
-            {/* Participants List */}
-            <div className="absolute right-4 top-4 w-64">
-              <CallParticipantsList onClose={() => {}} />
+            {/* Enhanced Call Controls */}
+            <div className="bg-gray-800 px-6 py-4 border-t border-gray-700">
+              <div className="flex items-center justify-between">
+                {/* Left: Stream Controls */}
+                <div className="flex items-center space-x-3">
+                  <CallControls onLeave={handleLeaveCall} />
+                </div>
+                
+                {/* Right: Action Buttons */}
+                <div className="flex items-center space-x-3">
+                  {/* Leave Call Button */}
+                  <button
+                    onClick={handleLeaveCall}
+                    className="flex items-center space-x-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-medium transition-colors duration-200"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span>Leave Call</span>
+                  </button>
+                  
+                  {/* End Call for All Button */}
+                  <button
+                    onClick={handleEndCall}
+                    className="flex items-center space-x-2 px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors duration-200 shadow-lg"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    <span>End Call for All</span>
+                  </button>
+                </div>
+              </div>
+              
+              {/* Call Info */}
+              <div className="mt-3 flex items-center justify-between text-sm">
+                <p className="text-gray-400">
+                  <span className="text-yellow-400">Leave:</span> Exit but keep call active for client
+                </p>
+                <p className="text-gray-400">
+                  <span className="text-red-400">End for All:</span> Terminate the consultation
+                </p>
+              </div>
             </div>
           </div>
         </StreamCall>

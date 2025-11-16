@@ -14,7 +14,7 @@ import Login from './pages/Login';
 import LawyerAppointments from './pages/Lawyer/LawyerAppointments';
 import LawyerDashboard from './pages/Lawyer/LawyerDashboard';
 import LawyerProfile from './pages/Lawyer/LawyerProfile';
-
+import LawyerVideoCall from './pages/Lawyer/LawyerVideoCall.jsx';
 
 function App() {
   const adminContext = useContext(AdminContext);
@@ -41,6 +41,7 @@ function App() {
           <Route path='/lawyer-dashboard' element={<LawyerDashboard />} />
           <Route path='/lawyer-appointments' element={<LawyerAppointments />} />
           <Route path='/lawyer-profile' element={<LawyerProfile />} />
+          <Route path="/lawyer/video-call/:appointmentId" element={<LawyerVideoCall />} />
         </Routes>
 
         </div>

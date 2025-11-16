@@ -4,6 +4,7 @@ import cors from "cors";
 import userRouter from "./routes/userRoute.js";
 import adminRouter from "./routes/adminRoute.js";
 import LawyerRouter from "./routes/lawyerRoute.js";
+import videoRouter from "./routes/videoRoutes.js";
 import { connectMongoDB } from "./config/mongodb.js";
 import { connectCloudinary } from "./config/cloudinary.js";
 
@@ -39,6 +40,7 @@ connectCloudinary().then(()=> console.log("Cloudinary Connected!!"));
 app.use("/api/user", userRouter); 
 app.use("/api/admin", adminRouter);
 app.use("/api/lawyer", LawyerRouter);
+app.use("/api/video", videoRouter);
 
 
 app.get('/health', (req, res) => {

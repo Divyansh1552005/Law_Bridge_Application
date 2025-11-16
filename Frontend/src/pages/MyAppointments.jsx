@@ -4,7 +4,7 @@ import { AppContext } from '../context/AppContext'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { assets } from '../assets/assets'
-
+import {Video} from "lucide-react"
 
 const MyAppointments = () => {
 
@@ -93,7 +93,7 @@ const MyAppointments = () => {
             receipt: order.receipt,
             handler: async (response) => {
 
-                console.log(response)
+                // console.log(response)
 
                 try {
                     const { data } = await axios.post(backendUrl + "/api/user/verify-razorpay", response, {
@@ -147,7 +147,28 @@ const MyAppointments = () => {
     // }
 
 
+    // video calling
+    const handleJoinVideoCall = (appointmentId) => {
+    navigate(`/video-call/${appointmentId}`);
+  };
 
+  // Add this function to check if appointment can join video
+  const canJoinVideo = (appointment) => {
+    const canJoin = appointment.payment && 
+      (appointment.cancelled === "Not Cancelled" || !appointment.cancelled) && 
+      !appointment.isCompleted;
+    
+    // Debug logging
+    // console.log('Video call check:', {
+    //   appointmentId: appointment._id,
+    //   payment: appointment.payment,
+    //   cancelled: appointment.cancelled,
+    //   isCompleted: appointment.isCompleted,
+    //   canJoin
+    // });
+    
+    return canJoin;
+  };
     // whenever my appointment page load hote hai aur token available hai tab user appointments leke aao
     useEffect(() => {
         if (token) {
@@ -273,6 +294,17 @@ const MyAppointments = () => {
                                                 </button>
                                             )}
                                         </>
+                                    )}
+
+                                    {/* Join Video Call Button */}
+                                    {canJoinVideo(item) && (
+                                        <button
+                                            onClick={() => handleJoinVideoCall(item._id)}
+                                            className="w-full px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                                        >
+                                            <Video size={18} />
+                                            Join Video Call
+                                        </button>
                                     )}
 
                                     {!isAppointmentCancelled(item) && !item.isCompleted && (

@@ -1,5 +1,7 @@
 import React from 'react'
 import { useContext, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Video } from 'lucide-react'
 import { LawyerContext } from '../../context/LawyerContext'
 import { AppContext } from '../../context/AppContext'
 import { assets } from '../../assets/assets'
@@ -8,6 +10,30 @@ const LawyerAppointments = () => {
 
   const { lToken, appointments, getAppointments, cancelAppointment, completeAppointment } = useContext(LawyerContext)
   const { slotDateFormat, calculateAge, currency } = useContext(AppContext)
+  const navigate = useNavigate()
+
+  // Add this function to handle video call
+  const handleJoinVideoCall = (appointmentId) => {
+    navigate(`/lawyer/video-call/${appointmentId}`)
+  }
+
+  // Add this function to check if appointment can join video
+  const canJoinVideo = (appointment) => {
+    const canJoin = appointment.payment && 
+      (appointment.cancelled === "Not Cancelled" || !appointment.cancelled) && 
+      !appointment.isCompleted;
+    
+    // Debug logging
+    console.log('Lawyer video call check:', {
+      appointmentId: appointment._id,
+      payment: appointment.payment,
+      cancelled: appointment.cancelled,
+      isCompleted: appointment.isCompleted,
+      canJoin
+    });
+    
+    return canJoin;
+  }
 
   useEffect(() => {
     if (lToken) {
@@ -48,7 +74,18 @@ const LawyerAppointments = () => {
               ? <p className='text-red-400 text-xs font-medium'>Cancelled</p>
               : item.isCompleted
                 ? <p className='text-green-500 text-xs font-medium'>Completed</p>
-                : <div className='flex'>
+                : <div className='flex items-center gap-2'>
+                  {/* Join Video Call Button */}
+                  {canJoinVideo(item) && (
+                    <button
+                      onClick={() => handleJoinVideoCall(item._id)}
+                      className="flex items-center gap-1 px-2 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700 transition"
+                      title="Join Video Call"
+                    >
+                      <Video size={14} />
+                      Video
+                    </button>
+                  )}
                   <img onClick={() => cancelAppointment(item._id)} className='w-10 cursor-pointer' src={assets.cancel_icon} alt="" />
                   <img onClick={() => completeAppointment(item._id)} className='w-10 cursor-pointer' src={assets.tick_icon} alt="" />
                 </div>

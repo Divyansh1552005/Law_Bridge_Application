@@ -17,6 +17,7 @@ import Navbar from './components/Navbar.jsx'
 import Footer from './components/Footer.jsx'
 import Chatbot from './pages/Chatbot.jsx'
 import Resources from './pages/Resources.jsx'
+import VideoCall from './pages/VideoCall.jsx'
 import {ToastContainer, toast} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -38,6 +39,7 @@ function App() {
         <Route path="/my-profile" element={<MyProfile />} />
         <Route path="/my-appointments" element={<MyAppointments />} />
         <Route path="/appointment/:lawyerId" element={<Appointment />} />
+        <Route path="/video-call/:appointmentId" element={<VideoCall />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
         <Route path="/refund-policy" element={<RefundPolicy />} />

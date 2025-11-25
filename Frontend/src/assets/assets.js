@@ -38,6 +38,9 @@ import Neurologist from './Neurologist.svg'
 import Pediatricians from './Pediatricians.svg'
 import homepgpic from "./homepgimg.jpg";
 import legallogo from "./final_logo_LB.png";
+import about_image_2 from "./about_image_2.png";
+import contact_image_2 from "./contact_image_2.png";
+
 export const assets = {
     appointment_img,
     header_img,
@@ -57,7 +60,9 @@ export const assets = {
     stripe_logo,
     razorpay_logo,
     homepgpic,
-    legallogo
+    about_image_2,
+    legallogo, 
+    contact_image_2,
 }
 
 export const specialityData = [

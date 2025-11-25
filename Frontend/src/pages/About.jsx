@@ -12,25 +12,25 @@ const About = () => {
       <div className="grid md:grid-cols-2 gap-12 items-center mb-20">
         <div className="relative">
           <div className="absolute inset-0 bg-primary/10 rounded-3xl transform rotate-3"></div>
-          <img 
-            className="relative w-full rounded-3xl shadow-lg transform hover:scale-[1.02] transition-transform duration-300" 
-            src={assets.about_image} 
-            alt="About Cure Desk" 
+          <img
+            className="relative w-full rounded-3xl shadow-lg transform hover:scale-[1.02] transition-transform duration-300"
+            src={assets.about_image_2}
+            alt="About Cure Desk"
           />
         </div>
         <div className="flex flex-col gap-6">
           <div className="space-y-6 text-gray-600 leading-relaxed">
             <p className="text-lg">
-              Welcome to Cure Desk, your trusted partner in managing your healthcare needs conveniently and efficiently. We understand the challenges individuals face when it comes to scheduling doctor appointments and managing their health records.
+              Welcome to LawBridge, your reliable partner for seamless legal assistance.
+              We understand the challenges individuals face when navigating legal processes, managing documents, or seeking the right legal guidance. LawBridge is designed to simplify these complexities by providing a streamlined, intuitive platform that empowers you to manage your legal needs with confidence.
             </p>
             <p className="text-lg">
-              Cure Desk is committed to excellence in healthcare technology. We continuously strive to enhance our platform, integrating the latest advancements to improve user experience and deliver superior service.
+              At LawBridge, we are dedicated to excellence in legal technology. Our team continuously enhances the platform, integrating modern tools and innovations to elevate user experience, strengthen reliability, and ensure complete transparency.
             </p>
             <div className="bg-blue-50 p-6 rounded-xl border border-blue-100">
               <h3 className="text-xl font-semibold text-gray-800 mb-3">Our Vision</h3>
               <p className="text-lg text-gray-600">
-                To create a seamless healthcare experience for every user, bridging the gap between patients and healthcare providers, making it easier for you to access the care you need, when you need it.
-              </p>
+                Our mission is clear: to create a smooth legal journey for every individual by bridging the gap between clients and legal professionals. With LawBridge, accessing expert legal support whenever you need it becomes effortless, efficient, and dependable.              </p>
             </div>
           </div>
         </div>
@@ -50,7 +50,7 @@ const About = () => {
               </svg>
             </div>
             <h3 className="text-lg font-semibold text-gray-800 group-hover:text-white mb-3 transition-colors">Efficiency</h3>
-            <p className="text-gray-600 group-hover:text-white/90 transition-colors">Streamlined appointment scheduling that fits into your busy lifestyle.</p>
+            <p className="text-gray-600 group-hover:text-white/90 transition-colors">Smart tools that simplify legal document management and case handling, helping you save time and avoid unnecessary delays.</p>
           </div>
 
           <div className="group bg-white rounded-xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 hover:bg-primary">
@@ -60,7 +60,7 @@ const About = () => {
               </svg>
             </div>
             <h3 className="text-lg font-semibold text-gray-800 group-hover:text-white mb-3 transition-colors">Convenience</h3>
-            <p className="text-gray-600 group-hover:text-white/90 transition-colors">Access to a network of trusted healthcare professionals in your area.</p>
+            <p className="text-gray-600 group-hover:text-white/90 transition-colors">Instant access to a trusted network of legal professionals, ensuring you find the right lawyer whenever you need support.</p>
           </div>
 
           <div className="group bg-white rounded-xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 hover:bg-primary">
@@ -70,7 +70,7 @@ const About = () => {
               </svg>
             </div>
             <h3 className="text-lg font-semibold text-gray-800 group-hover:text-white mb-3 transition-colors">Personalization</h3>
-            <p className="text-gray-600 group-hover:text-white/90 transition-colors">Tailored recommendations and reminders to help you stay on top of your health.</p>
+            <p className="text-gray-600 group-hover:text-white/90 transition-colors">Tailored legal insights, updates, and reminders designed to keep you informed and empowered throughout your legal journey.</p>
           </div>
         </div>
       </div>

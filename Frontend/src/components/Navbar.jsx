@@ -133,6 +133,14 @@ const Navbar = () => {
                 >
                     CONTACT
                 </NavLink>
+                <a 
+                    href='https://blogspace-alpha.vercel.app/'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='relative z-10 block px-4 py-2 text-base hover:text-primary transition-colors duration-300 cursor-pointer'
+                >
+                    COMMUNITY BLOG
+                </a>
             </nav>
 
             <div className='flex items-center gap-4 relative z-30'>
@@ -254,6 +262,15 @@ const Navbar = () => {
                         >
                             CONTACT
                         </NavLink>
+                        <a 
+                            href='https://blogspace-alpha.vercel.app/'
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            onClick={() => setShowMenu(false)}
+                            className='px-4 py-2 rounded-full inline-block hover:text-primary transition-colors duration-300'
+                        >
+                            BLOG
+                        </a>
                         {token ? (
                             <>
                                 <div className='w-full h-px bg-gray-200 my-2'></div>

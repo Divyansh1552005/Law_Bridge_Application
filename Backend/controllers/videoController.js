@@ -12,7 +12,7 @@ export const getVideoToken = async (req, res) => {
   try {
     const { appointmentId } = req.body;
     const userId = req.body.userId || req.body.lawyerId; // Works for both user and lawyer
-    
+  
     // Find appointment
     const appointment = await appointmentModel.findById(appointmentId);
     

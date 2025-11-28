@@ -11,6 +11,9 @@ importers:
       '@stream-io/node-sdk':
         specifier: ^0.7.20
         version: 0.7.20
+      axios:
+        specifier: ^1.13.2
+        version: 1.13.2
       bcrypt:
         specifier: ^6.0.0
         version: 6.0.0

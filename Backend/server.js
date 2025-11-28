@@ -5,6 +5,8 @@ import userRouter from "./routes/userRoute.js";
 import adminRouter from "./routes/adminRoute.js";
 import LawyerRouter from "./routes/lawyerRoute.js";
 import videoRouter from "./routes/videoRoutes.js";
+import chatRouter from "./routes/chatRoutes.js";
+import messageRouter from "./routes/messageRoutes.js";
 import { connectMongoDB } from "./config/mongodb.js";
 import { connectCloudinary } from "./config/cloudinary.js";
 
@@ -41,7 +43,8 @@ app.use("/api/user", userRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/lawyer", LawyerRouter);
 app.use("/api/video", videoRouter);
-
+app.use("/api/chat", chatRouter);
+app.use("/api/message", messageRouter);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: "ok", time: new Date().toISOString() });

@@ -1,8 +1,12 @@
 import React from 'react'
+import Sidebar from '../components/Sidebar'
 
 const Chatbot = () => {
   return (
-    <div>Chatbot</div>
+    <div className='flex'>
+      {/* <Sidebar /> */}
+      <div>Chatbot</div>
+    </div>
   )
 }
 

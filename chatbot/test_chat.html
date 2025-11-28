@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LawBridge Legal Chatbot Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        textarea, input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        .response-container {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            display: none;
+        }
+        .response-container.show {
+            display: block;
+        }
+        .answer {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+        }
+        .sources {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .source-doc {
+            background: white;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+        .error {
+            color: #e74c3c;
+            background: #fdf2f2;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #f5c6cb;
+        }
+        .history-item {
+            background: #f8f9fa;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 3px solid #6c757d;
+        }
+        .loading {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏛️ LawBridge Legal Chatbot Test</h1>
+        
+        <form id="chatForm">
+            <div class="form-group">
+                <label for="userMessage">Your Legal Question:</label>
+                <textarea id="userMessage" name="userMessage" placeholder="Ask a question about Indian Constitutional Law..." required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="apiUrl">API URL:</label>
+                <input type="text" id="apiUrl" name="apiUrl" value="http://localhost:8000/chat" placeholder="http://localhost:8000/chat">
+            </div>
+            
+            <div class="form-group">
+                <label>Chat History (simulated):</label>
+                <div class="history-item">
+                    <strong>User:</strong> What is the Constitution of India?
+                </div>
+                <div class="history-item">
+                    <strong>Assistant:</strong> The Constitution of India is the supreme law of India that establishes the framework of government...
+                </div>
+            </div>
+            
+            <button type="submit" id="submitBtn">Send Query</button>
+        </form>
+        
+        <div id="responseContainer" class="response-container">
+            <h3>Response:</h3>
+            <div id="responseContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const chatForm = document.getElementById('chatForm');
+        const responseContainer = document.getElementById('responseContainer');
+        const responseContent = document.getElementById('responseContent');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        // Sample chat history
+        const sampleChatHistory = [
+            {
+                "role": "user",
+                "content": "What is the Constitution of India?"
+            },
+            {
+                "role": "assistant", 
+                "content": "The Constitution of India is the supreme law of India that establishes the framework of government, fundamental rights, and directive principles."
+            }
+        ];
+        
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userMessage = document.getElementById('userMessage').value;
+            const apiUrl = document.getElementById('apiUrl').value;
+            
+            if (!userMessage.trim()) {
+                alert('Please enter a question!');
+                return;
+            }
+            
+            // Disable submit button and show loading
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending...';
+            responseContainer.classList.add('show');
+            responseContent.innerHTML = '<div class="loading">Processing your question...</div>';
+            
+            try {
+                const requestBody = {
+                    userMessage: userMessage,
+                    chatHistory: sampleChatHistory
+                };
+                
+                console.log('Sending request:', requestBody);
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Response received:', data);
+                
+                // Display response
+                let html = `
+                    <div class="answer">
+                        <h4>Answer:</h4>
+                        <p>${data.answer}</p>
+                    </div>
+                `;
+                
+                if (data.source_documents && data.source_documents.length > 0) {
+                    html += `
+                        <div class="sources">
+                            <h4>Source Documents:</h4>
+                    `;
+                    
+                    data.source_documents.forEach((doc, index) => {
+                        html += `
+                            <div class="source-doc">
+                                <strong>Source ${index + 1}:</strong>
+                                <p>${doc.content}</p>
+                                <small><strong>Metadata:</strong> ${JSON.stringify(doc.metadata, null, 2)}</small>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                }
+                
+                responseContent.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                responseContent.innerHTML = `
+                    <div class="error">
+                        <h4>Error:</h4>
+                        <p>${error.message}</p>
+                        <p>Make sure the chatbot API is running on the specified URL.</p>
+                    </div>
+                `;
+            } finally {
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Send Query';
+            }
+        });
+        
+        // Add some sample questions
+        const sampleQuestions = [
+            "What are fundamental rights in Indian Constitution?",
+            "Explain the concept of separation of powers in India",
+            "What is the role of the Supreme Court of India?",
+            "Tell me about Article 21 of the Indian Constitution"
+        ];
+        
+        // Add quick question buttons
+        const sampleQuestionsDiv = document.createElement('div');
+        sampleQuestionsDiv.innerHTML = `
+            <div class="form-group">
+                <label>Quick Sample Questions:</label>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    ${sampleQuestions.map(q => 
+                        `<button type="button" onclick="document.getElementById('userMessage').value='${q}'" style="width: auto; padding: 5px 10px; font-size: 12px;">${q.substring(0, 30)}...</button>`
+                    ).join('')}
+                </div>
+            </div>
+        `;
+        
+        chatForm.insertBefore(sampleQuestionsDiv, document.querySelector('button[type="submit"]'));
+    </script>
+</body>
+</html>

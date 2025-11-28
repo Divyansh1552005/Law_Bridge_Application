@@ -28,3 +28,29 @@ retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"
 def get_retriever():
     return retriever
 
+def check_embeddings_exist():
+    """
+    Check if embeddings already exist in the Pinecone index
+    Returns True if embeddings exist, False otherwise
+    """
+    try:
+        from config.pinecone_initialize import get_pinecone_index
+        
+        # Get the Pinecone index
+        index = get_pinecone_index()
+        
+        # Check index stats to see if it has any vectors
+        stats = index.describe_index_stats()
+        total_vector_count = stats.get('total_vector_count', 0)
+        
+        if total_vector_count > 0:
+            print(f"📊 Found {total_vector_count} existing vectors in Pinecone index")
+            return True
+        else:
+            print("📊 No vectors found in Pinecone index")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Error checking embeddings: {e}")
+        return False
+

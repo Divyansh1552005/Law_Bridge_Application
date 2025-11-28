@@ -39,7 +39,7 @@ def start_api_server():
     uvicorn.run(
         "api.chat:app",
         host="0.0.0.0",
-        port=8000,
+        port=4000,
         reload=True,
         reload_dirs=["src"]
     )

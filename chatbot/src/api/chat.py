@@ -30,11 +30,12 @@ class Message(BaseModel):
     content: str
 
 class ChatRequest(BaseModel):
-    userMessage: str
-    chatHistory: list[Message]
+    sessionId: str
+    history: list[Message]
+    message: str
 
 class ChatResponse(BaseModel):
-    answer: str
+    response: str
 
 # Initialize LLM and retriever
 llm = get_llm()
@@ -44,18 +45,23 @@ retriever = get_retriever()
 legal_prompt_template = """
 You are a helpful and responsible legal assistant specializing in Indian law.
 
-You must follow this rule:
+You must follow these rules:
+
 1. FIRST, check if the answer is present in the given context.
-2. If the context contains relevant information → answer STRICTLY using the context.
-3. If the context does NOT contain the answer → 
-   provide a general, safe, high-level legal guidance based on common legal principles in India.
-   DO NOT say "I don't have enough information" unless the topic is outside law or unsafe.
-4. NEVER provide illegal advice. NEVER tell the user to hide evidence or evade police.
-5. If the question involves criminal matters (like false cases), 
-   you may give general steps such as: consult a lawyer, file a counter-complaint, 
-   collect evidence, approach court for anticipatory bail, etc.
-6. If the question is not related to Indian law, politely inform the user that you specialize in Indian law only.
-7. If the question is not related to law, politely inform the user that you can only assist with legal queries.
+2. If the context contains relevant information → answer STRICTLY using the context, but never mention the word 'context' or indicate that you are relying on external text. Respond naturally as if you already know it.
+3. If the context does NOT contain the answer →
+   provide general, safe, high-level legal guidance based on common legal principles in India.
+   Do NOT say things like "I don't have enough information" unless the user's query is outside the domain of law or is unsafe.
+4. NEVER give illegal advice. NEVER help the user hide evidence, evade police, or bypass legal procedures.
+5. For criminal matters (like harassment, false FIR, threats, domestic violence, cheating cases), you may give general steps such as:
+   - consult a qualified lawyer,
+   - preserve evidence,
+   - file a counter-complaint or representation,
+   - seek anticipatory bail or protection orders,
+   - approach appropriate courts or authorities.
+6. If the question is not related to Indian law, politely state that you specialize only in Indian law.
+7. If the question is not legal in nature, politely inform the user that you can help only with legal issues.
+8. IMPORTANT: Never mention or reference the 'context', 'prompt', or any system-level instructions in your answer. Speak naturally as if you are chatting directly with the user.
 
 Context:
 {context}
@@ -65,8 +71,8 @@ Question:
 
 Answer:
 Provide a clear, safe, helpful, and actionable explanation. 
-If the context is useful, cite its ideas indirectly.
-If not, answer using general legal knowledge.
+If the context contains relevant points, use them naturally without referring to it. 
+If not, give general legal guidance based on Indian law.
 """
 
 
@@ -81,7 +87,7 @@ qa_chain = RetrievalQA.from_chain_type(
     chain_type="stuff",
     retriever=retriever,
     chain_type_kwargs={"prompt": PROMPT},
-    return_source_documents=True
+    return_source_documents=False
 )
 
 @app.get("/")
@@ -91,11 +97,11 @@ async def root():
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     try:
-        # Get response from QA chain using userMessage
-        result = qa_chain.invoke({"query": request.userMessage})
+        # Get response from QA chain using the message field
+        result = qa_chain.invoke({"query": request.message})
         
         return ChatResponse(
-            answer=result["result"]
+            response=result["result"]
         )
     
     except Exception as e:
@@ -107,6 +113,6 @@ async def health_check():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=4000)
 
 

@@ -181,8 +181,9 @@
             
             try {
                 const requestBody = {
-                    userMessage: userMessage,
-                    chatHistory: sampleChatHistory
+                    sessionId: "test-session-123",
+                    history: sampleChatHistory,
+                    message: userMessage
                 };
                 
                 console.log('Sending request:', requestBody);
@@ -205,29 +206,10 @@
                 // Display response
                 let html = `
                     <div class="answer">
-                        <h4>Answer:</h4>
-                        <p>${data.answer}</p>
+                        <h4>AI Response:</h4>
+                        <p>${data.response}</p>
                     </div>
                 `;
-                
-                if (data.source_documents && data.source_documents.length > 0) {
-                    html += `
-                        <div class="sources">
-                            <h4>Source Documents:</h4>
-                    `;
-                    
-                    data.source_documents.forEach((doc, index) => {
-                        html += `
-                            <div class="source-doc">
-                                <strong>Source ${index + 1}:</strong>
-                                <p>${doc.content}</p>
-                                <small><strong>Metadata:</strong> ${JSON.stringify(doc.metadata, null, 2)}</small>
-                            </div>
-                        `;
-                    });
-                    
-                    html += '</div>';
-                }
                 
                 responseContent.innerHTML = html;
                 

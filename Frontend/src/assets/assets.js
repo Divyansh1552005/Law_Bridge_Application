@@ -40,6 +40,12 @@ import homepgpic from "./homepgimg.jpg";
 import legallogo from "./final_logo_LB.png";
 import about_image_2 from "./about_image_2.png";
 import contact_image_2 from "./contact_image_2.png";
+import send_icon from "./send_icon.svg";
+import stop_icon from "./stop_icon.svg";
+import user_icon from "./user_icon.svg";
+import bin_icon from "./bin_icon.svg";
+import close_icon from "./close_icon.svg";
+import search_icon from "./search_icon.svg";
 
 export const assets = {
     appointment_img,
@@ -63,6 +69,12 @@ export const assets = {
     about_image_2,
     legallogo, 
     contact_image_2,
+    send_icon,
+    stop_icon,
+    user_icon,
+    bin_icon,
+    close_icon,
+    search_icon
 }
 
 export const specialityData = [

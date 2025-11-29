@@ -28,6 +28,8 @@ retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"
 def get_retriever():
     return retriever
 
+
+# to solve the problem of duplicate embeddings coz har baar naye se create karne pe duplicates ban jaate hain
 def check_embeddings_exist():
     """
     Check if embeddings already exist in the Pinecone index
@@ -44,13 +46,13 @@ def check_embeddings_exist():
         total_vector_count = stats.get('total_vector_count', 0)
         
         if total_vector_count > 0:
-            print(f"📊 Found {total_vector_count} existing vectors in Pinecone index")
+            print(f"Found {total_vector_count} existing vectors in Pinecone index")
             return True
         else:
-            print("📊 No vectors found in Pinecone index")
+            print("No vectors found in Pinecone index")
             return False
             
     except Exception as e:
-        print(f"❌ Error checking embeddings: {e}")
+        print(f"Error checking embeddings: {e}")
         return False
 

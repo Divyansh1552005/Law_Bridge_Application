@@ -27,31 +27,42 @@ function App() {
  
 
   return (
-    <div className="mx-4 sm:max-[10%]:">
+    <div>
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="light"/>
-      <Navbar />
+      
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/lawyers" element={<Lawyers />} />
-        <Route path="/lawyers/:speciality" element={<Lawyers />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/my-profile" element={<ProtectedRoute><MyProfile /></ProtectedRoute>} />
-        <Route path="/my-appointments" element={<ProtectedRoute><MyAppointments /></ProtectedRoute>} />
-        <Route path="/appointment/:lawyerId" element={<Appointment />} />
-        <Route path="/video-call/:appointmentId" element={<ProtectedRoute><VideoCall /></ProtectedRoute>} />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
-        <Route path="/refund-policy" element={<RefundPolicy />} />
-        <Route path="/contact-us" element={<ContactUs />} />
+        {/* Chatbot routes - separate layout without navbar/footer */}
         <Route path="/chatbot" element={
           <ProtectedRoute><Chatbot /></ProtectedRoute>} />
-        <Route path="/resources" element={<Resources />} />
+        <Route path="/chatbot/:sessionId" element={
+          <ProtectedRoute><Chatbot /></ProtectedRoute>} />
+        
+        {/* Main app routes - with navbar and footer */}
+        <Route path="/*" element={
+          <div className="mx-4 sm:max-[10%]:">
+            <Navbar />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/lawyers" element={<Lawyers />} />
+              <Route path="/lawyers/:speciality" element={<Lawyers />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/my-profile" element={<ProtectedRoute><MyProfile /></ProtectedRoute>} />
+              <Route path="/my-appointments" element={<ProtectedRoute><MyAppointments /></ProtectedRoute>} />
+              <Route path="/appointment/:lawyerId" element={<Appointment />} />
+              <Route path="/video-call/:appointmentId" element={<ProtectedRoute><VideoCall /></ProtectedRoute>} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+              <Route path="/refund-policy" element={<RefundPolicy />} />
+              <Route path="/contact-us" element={<ContactUs />} />
+              <Route path="/resources" element={<Resources />} />
+            </Routes>
+            <Footer />
+          </div>
+        } />
 
       </Routes>
-
-      <Footer />
       
     </div>
   )

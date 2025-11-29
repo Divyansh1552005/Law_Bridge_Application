@@ -8,7 +8,8 @@ export const getMessage = async (req, res) => {
     try {
         const userId = req.user?.id || req.body.userId;
 
-        const {sessionId, userMessage} = req.body;
+        const {sessionId, message} = req.body;
+        const userMessage = message;
 
         // find conversiation if it exists
         let chat = await conversationModel.findOne({sessionId, userId});

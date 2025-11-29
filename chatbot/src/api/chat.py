@@ -19,12 +19,13 @@ app = FastAPI(title="LawBridge Legal Chatbot API")
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify actual domains
+    allow_origins=["*"],  # In production, specify the domain jo isko access kar sake
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# chat models according  to backend using Pydantic
 class Message(BaseModel):
     role: str  # "user" or "assistant"
     content: str
@@ -36,6 +37,7 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     response: str
+
 
 # Initialize LLM and retriever
 llm = get_llm()
@@ -85,7 +87,7 @@ PROMPT = PromptTemplate(
     input_variables=["chat_history", "context", "question"]
 )
 
-# Note: We'll manually handle the retrieval and prompting to include chat history
+# We will manually handle the retrieval and prompting to include chat history
 
 @app.get("/")
 async def root():
@@ -97,7 +99,7 @@ async def chat(request: ChatRequest):
         # Format chat history for the prompt
         chat_history_formatted = ""
         if request.history and len(request.history) > 0:
-            # Get last 10 messages to avoid token limits
+            # Get last 10 messages only to avoid token limits becoz chat toh lambi ho sakti hai
             recent_messages = request.history[-10:] if len(request.history) > 10 else request.history
             for msg in recent_messages:
                 role = "User" if msg.role == "user" else "Assistant"
@@ -107,7 +109,7 @@ async def chat(request: ChatRequest):
         else:
             chat_history_formatted = "This is the start of our conversation.\n---\n"
         
-        print(f"DEBUG: Chat history formatted: {chat_history_formatted[:200]}...")  # Debug print
+        # print(f"DEBUG: Chat history formatted: {chat_history_formatted[:200]}...")  # Debug print
         
         # Get response from QA chain with chat history
         # We need to modify the chain to pass chat_history

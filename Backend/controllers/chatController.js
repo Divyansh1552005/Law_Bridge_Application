@@ -13,6 +13,8 @@ export const createChat = async (req, res) => {
       messages: [],
     });
 
+    console.log("New chat created:", newChat);
+
     res.status(201).json({
       success: true,
       message: "Chat created",
@@ -31,9 +33,41 @@ export const getChat = async (req, res) => {
 
     const chat = await conversationModel.findOne({ sessionId, userId });
 
+    console.log("CHAT FETCHED:", chat);
+
     res.status(200).json({
       success: true,
-      chat: chat || { sessionId, messages: [] },
+      chats: chat || { sessionId, messages: [] },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Get all user chat sessions
+export const getUserChats = async (req, res) => {
+  try {
+    const userId = req.user?.id || req.body.userId;
+
+    // Get all user chats with basic info (sessionId, first message, timestamps)
+    const chats = await conversationModel.find({ userId })
+      .select('sessionId messages createdAt updatedAt')
+      .sort({ updatedAt: -1 }); // Latest first
+
+    // Format the response to include last message preview
+    const formattedChats = chats.map(chat => ({
+      sessionId: chat.sessionId,
+      lastMessage: chat.messages.length > 0 
+        ? chat.messages[chat.messages.length - 1].content.slice(0, 50) + '...'
+        : 'New chat',
+      messageCount: chat.messages.length,
+      createdAt: chat.createdAt,
+      updatedAt: chat.updatedAt
+    }));
+
+    res.status(200).json({
+      success: true,
+      sessions: formattedChats,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -48,6 +82,7 @@ export const deleteChat = async (req, res) => {
 
     await conversationModel.deleteOne({ sessionId, userId });
 
+    console.log(`Chat with sessionId ${sessionId} deleted`);
     res.status(200).json({
       success: true,
       message: "Chat deleted",

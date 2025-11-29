@@ -5,6 +5,7 @@ import moment from "moment";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Edit3, Home } from "lucide-react";
 
 const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
   const {
@@ -112,20 +113,30 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
   // Update chat title
   const updateChatTitle = async (sessionIdToUpdate, newTitle) => {
     try {
-      // Update in localStorage (replace with backend call when available)
-      if (userData) {
-        const userKey = `chatSessions_${userData._id}`;
-        const sessions = JSON.parse(localStorage.getItem(userKey) || "[]");
-        const updatedSessions = sessions.map(chat => 
-          chat.sessionId === sessionIdToUpdate 
-            ? { ...chat, title: newTitle, updatedAt: new Date().toISOString() }
-            : chat
+      // Update chat title in backend
+      const { data } = await axios.put(`${backendUrl}/api/chat/update-title`, {
+        sessionId: sessionIdToUpdate,
+        title: newTitle
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (data.success) {
+        // Update local state
+        setChatSessions(prevSessions => 
+          prevSessions.map(chat => 
+            chat.sessionId === sessionIdToUpdate 
+              ? { ...chat, title: newTitle, updatedAt: new Date().toISOString() }
+              : chat
+          )
         );
-        localStorage.setItem(userKey, JSON.stringify(updatedSessions));
-        setChatSessions(updatedSessions);
+        toast.success("Chat title updated successfully");
+      } else {
+        toast.error(data.message || "Failed to update chat title");
       }
     } catch (error) {
       console.log("Error updating chat title:", error);
+      toast.error("Error updating chat title");
     }
   };
 
@@ -154,16 +165,16 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
 
   return (
     <div
-      className={`flex flex-col h-screen min-w-72 p-5 dark:bg-gradient-to-b from-[#242124]/30 to-[#000000]/30 border-r border-[#80609F]/30 backdrop-blur-3xl transition-all duration-500 ${
+      className={`flex flex-col h-screen min-w-80 p-5 dark:bg-gradient-to-b from-[#242124]/30 to-[#000000]/30 border-r border-[#80609F]/30 backdrop-blur-3xl transition-all duration-500 ${
         isMenuOpen ? 'translate-x-0' : '-translate-x-full'
       }`}
     >
       {/* Logo */}
-      <img
+      {/* <img
         src={assets.legallogo}
         alt="Law Bridge Logo"
         className="w-full max-w-48"
-      />
+      /> */}
 
       {/* Go to Homepage Button */}
       <button
@@ -171,38 +182,44 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
           navigate('/');
           setIsMenuOpen(false);
         }}
-        className="flex justify-center items-center w-full py-2 mt-10 text-gray-700 dark:text-white bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm rounded-md cursor-pointer transition-colors"
+        className="flex justify-center items-center w-full py-3 mt-15 text-gray-700 dark:text-white bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm rounded-md cursor-pointer transition-colors"
       >
-        <span className="mr-2">🏠</span> Go to Homepage
+        <Home size={16} className="mr-2" /> Go to Homepage
       </button>
 
       {/* New Chat Button */}
       <button
         onClick={handleNewChat}
         disabled={!userData}
-        className="flex justify-center items-center w-full py-2 mt-3 text-white bg-gradient-to-r from-[#A456F7] to-[#3D81F6] text-sm rounded-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        className="flex justify-center items-center w-full py-2 mt-3 text-white bg-[#A456F7] hover:bg-[#9146E6] text-sm rounded-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         <span className="mr-2 text-xl">+</span> New Legal Chat
       </button>
 
       {/* Search Conversations */}
-      <div className="flex items-center gap-2 p-3 mt-4 border border-gray-400 dark:border-white/20 rounded-md">
+      <div className="flex items-center gap-3 p-3 mt-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl shadow-sm hover:bg-white/20 transition-all duration-200">
         <img
           src={assets.search_icon}
           alt="search"
-          className="w-4 not-dark:invert"
+          className="w-4 h-4 opacity-70 not-dark:invert flex-shrink-0"
         />
         <input
           onChange={(e) => setSearch(e.target.value)}
           value={search}
           type="text"
-          placeholder="Search conversations"
-          className="text-xs placeholder:text-gray-400 outline-none bg-transparent"
+          placeholder="Search conversations..."
+          className="flex-1 text-sm placeholder:text-gray-400 dark:placeholder:text-gray-300 text-gray-700 dark:text-white outline-none bg-transparent"
         />
       </div>
 
       {/* Recent Chats */}
-      {chatSessions.length > 0 && <p className="mt-4 text-sm">Recent Legal Chats</p>}
+      {chatSessions.length > 0 && (
+        <div className="mt-6 mb-2">
+          <h3 className="text-base font-semibold text-center text-black dark:text-white">
+            Recent Legal Chats
+          </h3>
+        </div>
+      )}
       <div className="flex-1 overflow-y-scroll mt-3 text-sm space-y-3">
         {loading ? (
           <div className="text-center text-gray-500">Loading chats...</div>
@@ -218,7 +235,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
                 key={chat.sessionId}
                 className={`p-2 px-4 border border-gray-300 dark:border-[#80609F]/15 rounded-md flex justify-between group ${
                   sessionId === chat.sessionId 
-                    ? 'bg-[#A456F7]/20 dark:bg-[#57317C]/30' 
+                    ? 'bg-[#A456F7] text-white' 
                     : 'dark:bg-[#57317C]/10 hover:bg-gray-50 dark:hover:bg-[#57317C]/20'
                 }`}
               >
@@ -241,25 +258,29 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
                       {chat.title || chat.lastMessage || `Legal Chat ${chat.sessionId.split('-')[1]}`}
                     </p>
                   )}
-                  <p className="text-xs text-gray-500 dark:text-[#B1A6C0]">
+                  <p className={`text-sm font-medium mt-1 ${
+                    sessionId === chat.sessionId 
+                      ? 'text-white/90' 
+                      : 'text-[#A456F7] dark:text-gray-300'
+                  }`}>
                     {moment(chat.updatedAt).format('MMM DD, YYYY h:mm A')}
                   </p>
                 </div>
-                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-2">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       startEditingTitle(chat);
                     }}
-                    className="w-4 h-4 text-gray-400 hover:text-gray-600 cursor-pointer"
+                    className="p-1 text-black hover:text-gray-700 hover:bg-white/20 rounded transition-all duration-200"
                   >
-                    ✏️
+                    <Edit3 size={16} />
                   </button>
                   <img
                     onClick={(e) => deleteChat(e, chat.sessionId)}
                     src={assets.bin_icon}
                     alt="delete"
-                    className="w-4 cursor-pointer not-dark:invert flex-shrink-0"
+                    className="w-4 cursor-pointer brightness-0 flex-shrink-0"
                   />
                 </div>
               </div>
@@ -269,7 +290,11 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
 
       {/* User Info */}
       {userData && (
-        <div className="mt-auto p-3 border border-gray-300 dark:border-white/15 rounded-md">
+        <div className="mt-auto p-3 border border-gray-300 dark:border-white/15 rounded-md hover:bg-gray-50 dark:hover:bg-[#57317C]/20 transition-colors cursor-pointer"
+             onClick={() => {
+               navigate('/my-profile');
+               setIsMenuOpen(false);
+             }}>
           <div className="flex items-center gap-3">
             <img src={assets.user_icon} alt="user" className="w-7 rounded-full" />
             <p className="text-sm dark:text-primary truncate">
@@ -279,12 +304,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
         </div>
       )}
 
-      <img
-        onClick={() => setIsMenuOpen(false)}
-        src={assets.close_icon}
-        alt="close"
-        className="absolute top-3 right-3 w-5 h-5 cursor-pointer md:hidden not-dark:invert"
-      />
+      {/* Remove duplicate close button - main toggle handles this */}
     </div>
   );
 };

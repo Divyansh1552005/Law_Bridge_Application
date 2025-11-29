@@ -24,6 +24,10 @@ const conversationSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    title: {
+      type: String,
+      default: null,
+    },
     messages: [messageSchema],
   },
   { timestamps: true }

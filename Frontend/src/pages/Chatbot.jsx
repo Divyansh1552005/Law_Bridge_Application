@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import Sidebar from '../components/Chatbot_UI/Sidebar';
 import ChatBox from '../components/Chatbot_UI/ChatBox';
@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 
 const Chatbot = () => {
   const { sessionId: urlSessionId } = useParams();
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   const {
@@ -39,10 +40,16 @@ const Chatbot = () => {
     }
   }, [token]);
 
-  // Create initial chat if no session exists
+  // Create initial chat if no session exists and navigate to it
   useEffect(() => {
     if (token && userData && !sessionId && !urlSessionId) {
-      createNewChat();
+      const handleInitialChat = async () => {
+        const newSessionId = await createNewChat();
+        if (newSessionId) {
+          navigate(`/chatbot/${newSessionId}`);
+        }
+      };
+      handleInitialChat();
     }
   }, [token, userData, sessionId, urlSessionId, createNewChat]);
 
@@ -59,8 +66,8 @@ const Chatbot = () => {
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
-      {/* Fixed Sidebar - 260px width */}
-      <div className={`fixed left-0 top-0 h-full w-64 z-30 transform transition-transform duration-300 ease-in-out ${
+      {/* Fixed Sidebar - 320px width */}
+      <div className={`fixed left-0 top-0 h-full w-80 z-30 transform transition-transform duration-300 ease-in-out ${
         isMenuOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <Sidebar isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
@@ -68,7 +75,7 @@ const Chatbot = () => {
 
       {/* Main Chat Container - Fluid with proper spacing */}
       <div className={`flex-1 flex flex-col h-screen transition-all duration-300 ease-in-out ${
-        isMenuOpen ? 'ml-64' : 'ml-0'
+        isMenuOpen ? 'ml-80' : 'ml-0'
       }`}>
         {/* Toggle Button - Always visible */}
         <button

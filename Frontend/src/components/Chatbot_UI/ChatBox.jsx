@@ -122,19 +122,38 @@ const ChatBox = () => {
         <div className="w-full max-w-4xl flex flex-col h-full">
           <div ref={containerRef} className="flex-1 overflow-y-auto py-6 space-y-4">
             {messages.length === 0 && (
-              <div className="h-full flex flex-col items-center justify-center text-center px-4">
-                <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 max-w-md">
-                  <img
-                    src={assets.legallogo}
-                    alt="Law Bridge Logo"
-                    className="w-20 h-20 mx-auto mb-4 opacity-80"
-                  />
-                  <h2 className="text-2xl font-semibold text-gray-800 mb-2">
-                    Legal Assistant
-                  </h2>
-                  <p className="text-gray-500 text-sm leading-relaxed">
-                    Ask your legal question and get expert assistance
-                  </p>
+              <div className="h-full flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 to-gray-50">
+                {/* Welcome card with fade-in animation */}
+                <div className="animate-fade-in bg-white/80 backdrop-blur-sm rounded-2xl p-8 sm:p-10 md:p-12 shadow-lg border border-white/50 max-w-sm sm:max-w-md md:max-w-lg mx-auto">
+                  {/* Logo container with subtle hover effect */}
+                  <div className="flex justify-center mb-6">
+                    <div className="relative p-4 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
+                      <img
+                        src={assets.legallogo}
+                        alt="Law Bridge Logo"
+                        className="w-16 h-16 sm:w-20 sm:h-20 object-contain opacity-90"
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Typography with improved hierarchy */}
+                  <div className="text-center space-y-3">
+                    <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                      Legal Assistant
+                    </h1>
+                    <p className="text-gray-600 text-base sm:text-lg leading-relaxed font-medium px-2">
+                      Ask your legal question and get expert assistance
+                    </p>
+                  </div>
+                  
+                  {/* Subtle decorative element */}
+                  <div className="flex justify-center mt-8">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-purple-200 rounded-full animate-pulse"></div>
+                      <div className="w-2 h-2 bg-purple-300 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
+                      <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -159,31 +178,42 @@ const ChatBox = () => {
         </div>
       </div>
       
-      {/* Sticky Input Footer - Properly positioned */}
-      <div className="flex-shrink-0 bg-white border-t border-gray-100 p-4">
+      {/* Sticky Input Footer - Responsive */}
+      <div className="flex-shrink-0 bg-white border-t border-gray-100 p-3 sm:p-4">
         <div className="max-w-4xl mx-auto">
           <form
             onSubmit={onSubmit}
-            className="bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 p-4 flex gap-3 items-center"
+            className="bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 p-3 sm:p-4 flex gap-2 sm:gap-3 items-center"
           >
-            <input
+            <textarea
               onChange={(e) => setPrompt(e.target.value)}
               value={prompt}
-              type="text"
               placeholder="Ask your legal question..."
-              className="flex-1 text-sm text-gray-700 placeholder-gray-400 outline-none bg-transparent"
+              className="flex-1 text-sm sm:text-base text-gray-700 placeholder-gray-400 outline-none bg-transparent resize-none overflow-y-auto min-h-[40px] max-h-24 sm:max-h-32 leading-6"
               required
               disabled={loadingResponse}
+              rows={1}
+              onInput={(e) => {
+                e.target.style.height = 'auto';
+                const maxHeight = window.innerWidth < 640 ? 96 : 128; // 24 for mobile, 32 for desktop
+                e.target.style.height = Math.min(e.target.scrollHeight, maxHeight) + 'px';
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  onSubmit(e);
+                }
+              }}
             />
             <button 
               disabled={loadingResponse} 
               type="submit"
-              className="p-2 bg-[#A456F7] hover:bg-[#9146E6] disabled:bg-gray-300 rounded-xl transition-colors duration-200 group"
+              className="flex-shrink-0 p-2.5 sm:p-3 bg-[#A456F7] hover:bg-[#9146E6] disabled:bg-gray-300 rounded-xl transition-colors duration-200 group min-w-[40px] sm:min-w-[44px]"
             >
               <img
                 src={loadingResponse ? assets.stop_icon : assets.send_icon}
                 alt={loadingResponse ? "loading" : "send"}
-                className="w-5 h-5 group-hover:scale-105 transition-transform duration-200"
+                className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-105 transition-transform duration-200 mx-auto"
               />
             </button>
           </form>

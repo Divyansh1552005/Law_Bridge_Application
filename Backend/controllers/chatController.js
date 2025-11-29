@@ -49,14 +49,15 @@ export const getUserChats = async (req, res) => {
   try {
     const userId = req.user?.id || req.body.userId;
 
-    // Get all user chats with basic info (sessionId, first message, timestamps)
+    // Get all user chats with basic info (sessionId, title, first message, timestamps)
     const chats = await conversationModel.find({ userId })
-      .select('sessionId messages createdAt updatedAt')
+      .select('sessionId title messages createdAt updatedAt')
       .sort({ updatedAt: -1 }); // Latest first
 
     // Format the response to include last message preview
     const formattedChats = chats.map(chat => ({
       sessionId: chat.sessionId,
+      title: chat.title,
       lastMessage: chat.messages.length > 0 
         ? chat.messages[chat.messages.length - 1].content.slice(0, 50) + '...'
         : 'New chat',
@@ -68,6 +69,35 @@ export const getUserChats = async (req, res) => {
     res.status(200).json({
       success: true,
       sessions: formattedChats,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Update chat title
+export const updateChatTitle = async (req, res) => {
+  try {
+    const userId = req.user?.id || req.body.userId;
+    const { sessionId, title } = req.body;
+
+    const updatedChat = await conversationModel.findOneAndUpdate(
+      { sessionId, userId },
+      { title },
+      { new: true }
+    );
+
+    if (!updatedChat) {
+      return res.status(404).json({
+        success: false,
+        message: "Chat not found",
+      });
+    }
+
+    console.log(`Chat title updated for sessionId ${sessionId}`);
+    res.status(200).json({
+      success: true,
+      message: "Chat title updated",
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

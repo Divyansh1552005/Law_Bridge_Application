@@ -10,7 +10,7 @@ const messageSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-});
+}, { timestamps: true });
 
 const conversationSchema = new mongoose.Schema(
   {

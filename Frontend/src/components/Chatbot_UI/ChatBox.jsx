@@ -46,10 +46,11 @@ const ChatBox = () => {
 
     try {
       
-      // Add user message to local state
+      // Add user message to local state with timestamp
       const userMessage = {
         role: "user",
         content: promptCopy,
+        createdAt: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, userMessage]);
 
@@ -71,14 +72,17 @@ const ChatBox = () => {
         const botMessage = {
           role: "assistant",
           content: data.response.content,
+          createdAt: new Date().toISOString(),
         };
         setMessages((prev) => [...prev, botMessage]);
         
-        // Update current session with new messages
+        // Update current session with new messages (with timestamps)
         if (currentSession) {
+          const userMessageWithTimestamp = { ...userMessage, createdAt: userMessage.createdAt };
+          const botMessageWithTimestamp = { ...botMessage, createdAt: botMessage.createdAt };
           setCurrentSession({
             ...currentSession,
-            messages: [...(currentSession.messages || []), userMessage, botMessage]
+            messages: [...(currentSession.messages || []), userMessageWithTimestamp, botMessageWithTimestamp]
           });
         }
       }

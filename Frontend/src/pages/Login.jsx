@@ -59,11 +59,12 @@ const Login = () => {
           // Navigate after successful login
           setTimeout(() => navigate('/'), 1000);
         } else {
-          toast.error(data.message)
+          console.log(data.message)
+          toast.error("User does not exist. Please sign up first.")
         }
       } catch (error) {
         console.log(error)
-        toast.error(error.message)
+        toast.error("User does not exist. Please sign up first.")
       }
 
         }

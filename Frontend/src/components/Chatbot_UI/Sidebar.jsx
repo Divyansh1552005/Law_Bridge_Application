@@ -169,12 +169,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
         isMenuOpen ? 'translate-x-0' : '-translate-x-full'
       }`}
     >
-      {/* Logo */}
-      {/* <img
-        src={assets.legallogo}
-        alt="Law Bridge Logo"
-        className="w-full max-w-48"
-      /> */}
+      
 
       {/* Go to Homepage Button */}
       <button
@@ -225,11 +220,14 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
           <div className="text-center text-gray-500">Loading chats...</div>
         ) : (
           chatSessions
-            .filter((chat) =>
-              chat.lastMessage
-                ? chat.lastMessage.toLowerCase().includes(search.toLowerCase())
-                : chat.sessionId.toLowerCase().includes(search.toLowerCase())
-            )
+            .filter((chat) => {
+              const searchTerm = search.toLowerCase();
+              return (
+                (chat.title && chat.title.toLowerCase().includes(searchTerm)) ||
+                (chat.lastMessage && chat.lastMessage.toLowerCase().includes(searchTerm)) ||
+                chat.sessionId.toLowerCase().includes(searchTerm)
+              );
+            })
             .map((chat) => (
               <div
                 key={chat.sessionId}

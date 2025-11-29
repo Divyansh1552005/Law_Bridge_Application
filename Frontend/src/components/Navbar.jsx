@@ -104,7 +104,7 @@ const Navbar = () => {
                         activeLink === '/lawyers' ? 'text-primary font-semibold' : ''
                     }`}
                 >
-                    ALL LAWYERS
+                    BOOK A LAWYER
                 </NavLink>
                 <NavLink 
                     to='/resources' 
@@ -139,7 +139,7 @@ const Navbar = () => {
                     rel='noopener noreferrer'
                     className='relative z-10 block px-4 py-2 text-base hover:text-primary transition-colors duration-300 cursor-pointer'
                 >
-                    COMMUNITY BLOG
+                    BLOG
                 </a>
             </nav>
 
@@ -233,7 +233,7 @@ const Navbar = () => {
                                 activeLink === '/lawyers' ? 'text-primary font-semibold bg-gradient-to-r from-primary/10 via-primary/20 to-primary/10' : ''
                             }`}
                         >
-                            ALL LAWYERS
+                            BOOK A LAWYER
                         </NavLink>
                         <NavLink 
                             onClick={() => setShowMenu(false)} 
@@ -299,7 +299,7 @@ const Navbar = () => {
                                 <div className='w-full h-px bg-gray-200 my-2'></div>
                                 <button 
                                     onClick={() => { setShowMenu(false); navigate('/login'); }} 
-                                    className='bg-[#5f6FFF] text-white px-6 py-3 rounded-full font-medium hover:bg-[#4f5fff] transition-colors duration-200'
+                                    className='bg-[#5f6FFF] text-white px-8 py-3 rounded-xl font-medium hover:bg-[#4f5fff] transition-colors duration-200 w-full max-w-xs mx-auto'
                                 >
                                     Sign up
                                 </button>

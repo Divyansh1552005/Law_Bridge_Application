@@ -108,8 +108,8 @@ const Chatbot = () => {
         </button>
         {/* Header - Clean light design */}
         <div className="bg-white border-b border-gray-100 px-6 py-4 shadow-sm">
-          <div className="flex items-center justify-between max-w-4xl mx-auto">
-            <div>
+          <div className="flex items-center justify-between sm:justify-between justify-center max-w-4xl mx-auto">
+            <div className="text-center sm:text-left">
               <h1 className="text-xl font-semibold text-gray-900">
                 Legal Assistant
               </h1>
@@ -120,7 +120,7 @@ const Chatbot = () => {
                 }
               </p>
             </div>
-            <div className="flex items-center gap-2 bg-green-50 px-3 py-1 rounded-full">
+            <div className="hidden sm:flex items-center gap-2 bg-green-50 px-3 py-1 rounded-full">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
               <span className="text-sm text-green-700 font-medium">Online</span>
             </div>

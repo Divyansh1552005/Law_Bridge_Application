@@ -192,10 +192,8 @@ pip install -r req.txt
 Create a `.env` file in the `Backend/` directory:
 
 ```env
-# MongoDB Configuration
-MONGODB_URI=mongodb://localhost:27017/lawbridge
-# or for MongoDB Atlas:
-# MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/lawbridge
+for MongoDB Atlas:
+# MONGODB_URI=your_mongoDB_string
 
 # JWT Secret
 JWT_SECRET=your_super_secret_jwt_key_here_change_this
@@ -218,8 +216,8 @@ PORT=4000
 NODE_ENV=development
 
 # Admin Configuration
-ADMIN_EMAIL=admin@lawbridge.com
-ADMIN_PASSWORD=admin123
+ADMIN_EMAIL=your_email
+ADMIN_PASSWORD=your_password
 ```
 
 ### Frontend Environment Variables
@@ -245,14 +243,11 @@ Create a `.env` file in the `chatbot/` directory:
 
 ```env
 # Groq API Configuration
-GROQ_API_KEY=your_groq_api_key_here
+GOOGLE_API_KEY=your_gemini_api_key_here
 
 # ChromaDB Configuration
-CHROMA_DB_PATH=./chroma_db
-
-# Model Configuration
-EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
-LLM_MODEL=llama-3.3-70b-versatile
+PINECONE_API_KEY=your_...
+PINECONE_INDEX=name
 
 # Server Configuration
 HOST=0.0.0.0

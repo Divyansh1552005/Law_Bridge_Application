@@ -80,7 +80,7 @@ LawBridge is a comprehensive full-stack legal services platform that connects us
 - **Embeddings**: Sentence Transformers
 - **LLM**: Groq API (Llama 3 models)
 - **Document Processing**: LangChain
-- **RAG Implementation**: Custom implementation with Indian Constitutional Law corpus
+- **RAG Implementation**: Custom implementation with Indian Constitutional Law corpus 
 
 ### Admin Panel
 - **Framework**: React with Vite
@@ -143,7 +143,7 @@ Before you begin, ensure you have the following installed:
 - **Node.js** (v18.x or higher)
 - **pnpm** (v10.x or higher) - `npm install -g pnpm`
 - **Python** (v3.10 or higher)
-- **MongoDB** (local or MongoDB Atlas)
+- **MongoDB** (MongoDB Atlas)
 - **Git**
 
 ## 🚀 Installation
@@ -218,6 +218,9 @@ NODE_ENV=development
 # Admin Configuration
 ADMIN_EMAIL=your_email
 ADMIN_PASSWORD=your_password
+
+# Secret key for RAG chatbot communication
+RAG_SECRET_KEY=your_super_secret_key_here_change_this
 ```
 
 ### Frontend Environment Variables
@@ -225,8 +228,10 @@ ADMIN_PASSWORD=your_password
 Create a `.env` file in the `Frontend/` directory:
 
 ```env
-VITE_BACKEND_URL=http://localhost:4000
-VITE_CHATBOT_URL=http://localhost:8000
+VITE_BACKEND_URL=http://localhost:3000
+VITE_CHATBOT_URL=http://localhost:4000
+VITE_STREAM_API_KEY=your_stream_api_key
+VITE_RAZORPAY_KEY_ID=your_razorpay_key_id
 ```
 
 ### Admin Environment Variables
@@ -242,16 +247,19 @@ VITE_BACKEND_URL=http://localhost:4000
 Create a `.env` file in the `chatbot/` directory:
 
 ```env
-# Groq API Configuration
+# GEMINI API Configuration
 GOOGLE_API_KEY=your_gemini_api_key_here
 
-# ChromaDB Configuration
+# Pinecone Configuration
 PINECONE_API_KEY=your_...
 PINECONE_INDEX=name
 
 # Server Configuration
 HOST=0.0.0.0
-PORT=8000
+PORT=4000
+
+# Secret key
+RAG_SECRET_KEY=your_super_secret_key_here_change_this
 ```
 
 ## 🏃 Running the Application

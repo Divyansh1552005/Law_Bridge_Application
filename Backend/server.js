@@ -1,6 +1,6 @@
 import express from "express";
-import "dotenv/config";
 import cors from "cors";
+import "dotenv/config";
 import userRouter from "./routes/userRoute.js";
 import adminRouter from "./routes/adminRoute.js";
 import LawyerRouter from "./routes/lawyerRoute.js";
@@ -15,10 +15,14 @@ import rateLimit from "express-rate-limit";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// CORS configuration - must be first
+app.use(cors({
+  origin: true, // Allow all origins in development
+  credentials: true
+}));
+
 // json middleware
 app.use(express.json());
-app.use(cors());
-
 
 // Rate limiting middleware
 const limiter = rateLimit({

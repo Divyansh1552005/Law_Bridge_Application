@@ -16,25 +16,24 @@ def get_pinecone_index():
     # 1. Init client
     pc = Pinecone(api_key=PINECONE_API_KEY)
 
-    # 2. Check existing indexes
-    existing_indexes = [index.name for index in pc.list_indexes()]
+    # do this only when index does not exist, commented out for now coz i have created the index already
+    # # 2. Check existing indexes
+    # existing_indexes = [index.name for index in pc.list_indexes()]
 
-    # 3. Create if needed
-    if PINECONE_INDEX not in existing_indexes:
-        pc.create_index(
-            name=PINECONE_INDEX,
-            dimension=768,  # Google text-embedding-004 dimension
-            metric="cosine",
-            spec=ServerlessSpec(
-                cloud="aws",
-                region="us-east-1"
-            )
-        )
-        print(f"Created index: {PINECONE_INDEX}")
-        # Wait for index to be ready
-        time.sleep(10)
-    else:
-        print(f"Index {PINECONE_INDEX} already exists!")
+    # # 3. Create if needed
+    # if PINECONE_INDEX not in existing_indexes:
+    #     pc.create_index(
+    #         name=PINECONE_INDEX,
+    #         dimension=768,  # Google text-embedding-004 dimension
+    #         metric="cosine",
+    #         spec=ServerlessSpec(
+    #             cloud="aws",
+    #             region="us-east-1"
+    #         )
+    #     )
+    #     print(f"Created index: {PINECONE_INDEX}")
+    # else:
+    #     print(f"Index {PINECONE_INDEX} already exists!")
 
     # 4. Return connected index
     return pc.Index(PINECONE_INDEX)

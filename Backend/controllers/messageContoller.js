@@ -1,6 +1,8 @@
 import axios from "axios";
 import conversationModel from "../models/conversationModel.js";
 import userModel from "../models/userModel.js";
+import dotenv from "dotenv/config";
+
 
 // chat message 
 export const getMessage = async (req, res) => {
@@ -34,7 +36,14 @@ export const getMessage = async (req, res) => {
             sessionId,
             history: chat.messages,
             message: userMessage
-        });
+        },
+
+        {
+            headers: {
+                'secure_key': process.env.RAG_SECRET_KEY
+            }
+        },
+    );
 
         const chatbot_reply = chatbot_response.data.response;
         

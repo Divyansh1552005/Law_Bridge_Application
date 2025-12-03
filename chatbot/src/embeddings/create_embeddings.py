@@ -16,12 +16,13 @@ def create_and_store_embeddings():
     Complete pipeline to load PDF, chunk text, and store embeddings
     Only creates embeddings if they don't already exist
     """
-    from vectorStore_Retrieval.store_embedding import check_embeddings_exist
+    # Commented out embedding check - using existing Pinecone index directly
+    # from vectorStore_Retrieval.store_embedding import check_embeddings_exist
     
     # Check if embeddings already exist
-    if check_embeddings_exist():
-        print("Embeddings already exist in Pinecone index. Skipping creation.")
-        return []
+    # if check_embeddings_exist():
+    #     print("Embeddings already exist in Pinecone index. Skipping creation.")
+    #     return []
     
     print("Loading PDF documents...")
     documents = load_pdf()

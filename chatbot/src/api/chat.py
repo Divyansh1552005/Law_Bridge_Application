@@ -1,17 +1,21 @@
 import sys
 from pathlib import Path
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
+import os
 
 # Ensure we can import from src directory
 src_path = Path(__file__).parent.parent
 if str(src_path) not in sys.path:
     sys.path.insert(0, str(src_path))
 
+
+
 from config.genai_initialize import get_llm
+from config.env import APP_SECRET_KEY
 from vectorStore_Retrieval.store_embedding import get_retriever
 
 app = FastAPI(title="LawBridge Legal Chatbot API")
@@ -96,7 +100,15 @@ async def root():
     return {"message": "LawBridge Legal Chatbot API is running!"}
 
 @app.post("/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest):
+async def chat(request: ChatRequest, secure_key : str = Header(None, alias="secure_key")):
+    # Debug logging
+    # print(f"Received secure_key: '{secure_key}'")
+    # print(f"Expected APP_SECRET_KEY: '{APP_SECRET_KEY}'")
+    # print(f"Match: {secure_key == APP_SECRET_KEY}")
+    
+    # validating api key
+    if(secure_key != APP_SECRET_KEY):
+        raise HTTPException(status_code=401, detail="Unauthorized: Invalid or missing key")
     try:
         # Format chat history for the prompt
         chat_history_formatted = ""

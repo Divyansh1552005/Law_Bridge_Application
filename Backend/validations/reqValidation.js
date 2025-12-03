@@ -29,10 +29,17 @@ export const updatePatchRequestBodySchemaforUser = z.object({
 
   phone: z
     .string()
-    .regex(/^[0-9]{10}$/, "Phone must be a valid 10-digit number")
+    .refine((val) => val === '' || /^[0-9]{10}$/.test(val), {
+      message: "Phone must be a valid 10-digit number or empty"
+    })
     .optional(),
 
-  dob: z.string().min(1, "Date of Birth cannot be empty").optional(),
+  dob: z
+    .string()
+    .refine((val) => val === '' || val === 'Not Selected' || /^\d{4}-\d{2}-\d{2}$/.test(val), {
+      message: "Date of Birth must be in YYYY-MM-DD format, 'Not Selected', or empty"
+    })
+    .optional(),
 
   gender: z.enum(["Male", "Female", "Other", "Not Selected"]).optional(),
 

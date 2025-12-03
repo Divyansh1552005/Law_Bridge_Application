@@ -156,13 +156,23 @@ export const getUserProfile = async (req, res) => {
 
 export const updateUserProfile = async (req, res) => {
   try {
+    // Ensure userId is in the body for validation (added by authUser middleware)
+    const bodyToValidate = {
+      ...req.body,
+      userId: req.body.userId || req.user?.id
+    };
+
+    console.log('Update profile request body:', bodyToValidate); // Debug log
+
     const { success, data, error } =
-      await updatePatchRequestBodySchemaforUser.safeParseAsync(req.body);
+      await updatePatchRequestBodySchemaforUser.safeParseAsync(bodyToValidate);
 
     if (!success) {
+      console.log('Validation error:', error.format()); // Debug log
       return res.status(400).json({
         error: error.format(),
         success: false,
+        message: "Validation failed"
       });
     }
 
@@ -171,8 +181,8 @@ export const updateUserProfile = async (req, res) => {
     const updates = {};
 
     if (name !== undefined) updates.name = name;
-    if (phone !== undefined) updates.phone = phone;
-    if (dob !== undefined) updates.dob = dob;
+    if (phone !== undefined && phone !== '') updates.phone = phone;
+    if (dob !== undefined && dob !== '' && dob !== 'Not Selected') updates.dob = dob;
     if (gender !== undefined) updates.gender = gender;
     
     // Handle address parsing if it's a string

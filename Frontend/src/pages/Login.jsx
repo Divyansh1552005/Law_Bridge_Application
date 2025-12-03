@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { AppContext } from '../context/AppContext.jsx'
-import axios from 'axios'
+import api from '../api/axiosClient'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
 
@@ -25,7 +25,7 @@ const Login = () => {
 
     if (state === 'Sign Up') {
       try {
-        const { data } = await axios.post(backendUrl + '/api/user/signup', { 
+        const { data } = await api.post(backendUrl + '/api/user/signup', { 
           name, 
           email, 
           password 
@@ -43,13 +43,18 @@ const Login = () => {
         }
       } catch (error) {
         console.error('Registration error:', error);
-        toast.error(error.response?.data?.message || error.message);
+        const errorMessage = error.response?.data?.error || error.response?.data?.message || error.message;
+        if (error.response?.status === 409) {
+          toast.error('An account with this email already exists. Please login instead.');
+        } else {
+          toast.error(errorMessage || 'Registration failed. Please try again.');
+        }
       }
 
         } else { // state is Login
 
       try {
-        const { data } = await axios.post(backendUrl + '/api/user/login', { email, password })
+        const { data } = await api.post(backendUrl + '/api/user/login', { email, password })
 
         if (data.success) {
           localStorage.setItem('token', data.token)

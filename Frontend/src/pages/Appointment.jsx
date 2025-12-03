@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
 import { assets } from '../assets/assets'
 import RelatedLawyers from '../components/RelatedLawyers'
-import axios from 'axios'
+import api from '../api/axiosClient'
 import { toast } from 'react-toastify'
 
 const Appointment = () => {
@@ -106,7 +106,7 @@ const Appointment = () => {
 
         try {
 
-            const { data } = await axios.post(backendUrl + '/api/user/book-appointment', { lawyerId, slotDate, slotTime }, {
+            const { data } = await api.post(backendUrl + '/api/user/book-appointment', { lawyerId, slotDate, slotTime }, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             if (data.success) {

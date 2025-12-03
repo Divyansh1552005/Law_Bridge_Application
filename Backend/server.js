@@ -9,7 +9,7 @@ import chatRouter from "./routes/chatRoutes.js";
 import messageRouter from "./routes/messageRoutes.js";
 import { connectMongoDB } from "./config/mongodb.js";
 import { connectCloudinary } from "./config/cloudinary.js";
-
+import rateLimit from "express-rate-limit";
 
 
 const app = express();
@@ -18,6 +18,20 @@ const PORT = process.env.PORT || 3000;
 // json middleware
 app.use(express.json());
 app.use(cors());
+
+
+// Rate limiting middleware
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,  // 15 minutes
+  max: 100,                  // each IP gets 100 requests ie about 7 requests per minute
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: "Too many requests from this IP, try again later.",
+});
+
+app.use(limiter);
+
+
 
 // const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",");
 

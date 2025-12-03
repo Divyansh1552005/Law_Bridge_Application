@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
-import axios from 'axios'
+import api from '../api/axiosClient'
 import { toast } from 'react-toastify'
 import { assets } from '../assets/assets'
 import {Video} from "lucide-react"
@@ -37,7 +37,7 @@ const MyAppointments = () => {
                 return;
             }
 
-            const { data } = await axios.get(backendUrl + '/api/user/appointments', {
+            const { data } = await api.get(backendUrl + '/api/user/appointments', {
                 headers: { 
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -63,7 +63,7 @@ const MyAppointments = () => {
 
         try {
 
-            const { data } = await axios.post(backendUrl + '/api/user/cancel-appointment', { appointmentId }, { 
+            const { data } = await api.post(backendUrl + '/api/user/cancel-appointment', { appointmentId }, { 
                 headers: {Authorization: `Bearer ${token}`,
              } })
 
@@ -96,7 +96,7 @@ const MyAppointments = () => {
                 // console.log(response)
 
                 try {
-                    const { data } = await axios.post(backendUrl + "/api/user/verify-razorpay", response, {
+                    const { data } = await api.post(backendUrl + "/api/user/verify-razorpay", response, {
                         headers: { Authorization: `Bearer ${token}` }
                      });
                     if (data.success) {
@@ -116,7 +116,7 @@ const MyAppointments = () => {
     // Function to make payment using razorpay
     const appointmentRazorpay = async (appointmentId) => {
         try {
-            const { data } = await axios.post(backendUrl + '/api/user/payment-razorpay', { appointmentId }, { 
+            const { data } = await api.post(backendUrl + '/api/user/payment-razorpay', { appointmentId }, { 
                 headers: { Authorization: `Bearer ${token}` }
              })
             if (data.success) {
@@ -133,7 +133,7 @@ const MyAppointments = () => {
     // // Function to make payment using stripe
     // const appointmentStripe = async (appointmentId) => {
     //     try {
-    //         const { data } = await axios.post(backendUrl + '/api/user/payment-stripe', { appointmentId }, { headers: { token } })
+    //         const { data } = await api.post(backendUrl + '/api/user/payment-stripe', { appointmentId }, { headers: { token } })
     //         if (data.success) {
     //             const { session_url } = data
     //             window.location.replace(session_url)

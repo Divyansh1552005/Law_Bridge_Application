@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { AppContext } from '../context/AppContext'
-import axios from 'axios'
+import api from '../api/axiosClient'
 import { toast } from 'react-toastify'
 import { assets } from '../assets/assets'
 
@@ -30,9 +30,10 @@ const MyProfile = () => {
             // if user wanna update image only then we append it to formData
             image && formData.append('image', image)
 
-            const { data } = await axios.patch(backendUrl + '/api/user/update-profile', formData, {
+            const { data } = await api.patch(backendUrl + '/api/user/update-profile', formData, {
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'
                 }
             })
 
@@ -115,12 +116,17 @@ const MyProfile = () => {
                                 {isEdit ? (
                                     <input 
                                         className='w-full px-3 py-2 bg-white rounded border border-gray-200 focus:border-primary focus:outline-none transition-colors'
-                                        type="text"
-                                        onChange={(e) => setUserData(prev => ({ ...prev, phone: e.target.value }))}
-                                        value={userData.phone}
+                                        type="tel"
+                                        placeholder="Enter 10-digit phone number"
+                                        maxLength="10"
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/\D/g, ''); // Only allow digits
+                                            setUserData(prev => ({ ...prev, phone: value }));
+                                        }}
+                                        value={userData.phone || ''}
                                     />
                                 ) : (
-                                    <p className='text-primary font-medium'>{userData.phone}</p>
+                                    <p className='text-primary font-medium'>{userData.phone || 'Not provided'}</p>
                                 )}
                             </div>
                             <div className='space-y-1'>
@@ -183,10 +189,10 @@ const MyProfile = () => {
                                         className='w-full px-3 py-2 bg-white rounded border border-gray-200 focus:border-primary focus:outline-none transition-colors'
                                         type='date'
                                         onChange={(e) => setUserData(prev => ({ ...prev, dob: e.target.value }))}
-                                        value={userData.dob}
+                                        value={userData.dob && userData.dob !== 'Not Selected' ? userData.dob : ''}
                                     />
                                 ) : (
-                                    <p className='text-gray-700'>{userData.dob}</p>
+                                    <p className='text-gray-700'>{userData.dob && userData.dob !== 'Not Selected' ? userData.dob : 'Not Selected'}</p>
                                 )}
                             </div>
                         </div>

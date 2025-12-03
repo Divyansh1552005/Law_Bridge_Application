@@ -4,7 +4,7 @@ import { assets } from "../../assets/assets";
 import Message from "./Message";
 import { toast } from "react-toastify";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axiosClient";
 
 const ChatBox = () => {
   const containerRef = useRef(null);
@@ -55,7 +55,7 @@ const ChatBox = () => {
       setMessages((prev) => [...prev, userMessage]);
 
       // Send to backend API
-      const { data } = await axios.post(
+      const { data } = await api.post(
         `${backendUrl}/api/message/get-message`,
         { 
           message: promptCopy,

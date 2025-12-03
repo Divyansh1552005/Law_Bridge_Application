@@ -4,7 +4,7 @@ import { assets } from "../../assets/assets";
 import moment from "moment";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axiosClient";
 import { Edit3, Home } from "lucide-react";
 
 const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
@@ -34,7 +34,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
     
     setLoading(true);
     try {
-      const { data } = await axios.get(`${backendUrl}/api/chat/sessions`, {
+      const { data } = await api.get(`${backendUrl}/api/chat/sessions`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -75,7 +75,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
 
       if (!confirm) return;
 
-      const { data } = await axios.delete(`${backendUrl}/api/chat/delete`, {
+      const { data } = await api.delete(`${backendUrl}/api/chat/delete`, {
         data: { sessionId: sessionIdToDelete },
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -114,7 +114,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
   const updateChatTitle = async (sessionIdToUpdate, newTitle) => {
     try {
       // Update chat title in backend
-      const { data } = await axios.put(`${backendUrl}/api/chat/update-title`, {
+      const { data } = await api.put(`${backendUrl}/api/chat/update-title`, {
         sessionId: sessionIdToUpdate,
         title: newTitle
       }, {

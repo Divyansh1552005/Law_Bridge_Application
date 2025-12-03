@@ -8,7 +8,7 @@ const userRouter = express.Router();
 userRouter.post("/signup", signupUser);
 userRouter.post("/login", loginUser);
 userRouter.get("/get-profile", authUser, getUserProfile);
-userRouter.patch("/update-profile", upload.single("image"), authUser, updateUserProfile);
+userRouter.patch("/update-profile", authUser, upload.single("image"),  updateUserProfile);
 userRouter.post('/book-appointment', authUser, bookAppointment);
 userRouter.get('/appointments', authUser, listAppointment);
 userRouter.post('/cancel-appointment', authUser, cancelAppointment);

@@ -1,5 +1,5 @@
 import {createContext} from 'react';
-import axios from 'axios'; 
+import api from '../api/axiosClient'; 
 import {toast} from 'react-toastify';
 import {useEffect, useState} from 'react';
 
@@ -21,7 +21,7 @@ const AppContextProvider = (props) =>{
 
   const getLawyersData = async () => {
     try {
-      const { data } = await axios.get(backendUrl + '/api/lawyer/list');
+      const { data } = await api.get(backendUrl + '/api/lawyer/list');
       if (data.success) {
           setLawyers(data.lawyers);
       }else{
@@ -36,7 +36,7 @@ const AppContextProvider = (props) =>{
 
       if(!token) return;
     try {
-      const { data } = await axios.get(backendUrl + '/api/user/get-profile', {
+      const { data } = await api.get(backendUrl + '/api/user/get-profile', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -66,7 +66,7 @@ const AppContextProvider = (props) =>{
       const newSessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       setSessionId(newSessionId);  
       
-      const { data } = await axios.post(backendUrl + '/api/chat/create', {
+      const { data } = await api.post(backendUrl + '/api/chat/create', {
         sessionId: newSessionId
       }, {
         headers: {
@@ -101,7 +101,7 @@ const AppContextProvider = (props) =>{
         return;
       }
 
-      const { data } = await axios.get(`${backendUrl}/api/chat/get/${sessionToFetch}`, {
+      const { data } = await api.get(`${backendUrl}/api/chat/get/${sessionToFetch}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

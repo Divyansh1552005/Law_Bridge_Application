@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { StreamVideo, StreamVideoClient, StreamCall, CallControls, SpeakerLayout, CallParticipantsList } from '@stream-io/video-react-sdk';
-import axios from 'axios';
+import api from '../api/axiosClient';
 import { toast } from 'react-toastify';
 import '@stream-io/video-react-sdk/dist/css/styles.css';
 
@@ -52,7 +52,7 @@ const VideoCall = () => {
       const token = localStorage.getItem('token');
       
       // Get Stream token and call details from backend
-      const { data } = await axios.post(
+      const { data } = await api.post(
         backendUrl + '/api/video/get-token',
         { appointmentId },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -109,7 +109,7 @@ const VideoCall = () => {
       setLoading(false);
 
       // Update call status to joined
-      await axios.post(
+      await api.post(
         backendUrl + '/api/video/update-status',
         { appointmentId, action: 'join' },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -131,7 +131,7 @@ const VideoCall = () => {
       const token = localStorage.getItem('token');
       
       // Update call status to left
-      await axios.post(
+      await api.post(
         backendUrl + '/api/video/update-status',
         { appointmentId, action: 'leave' },
         { headers: { Authorization: `Bearer ${token}` } }

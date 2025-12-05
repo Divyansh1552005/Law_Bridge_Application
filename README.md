@@ -20,6 +20,10 @@ LawBridge is a comprehensive full-stack legal services platform that connects us
 - [Contributing](#-contributing)
 - [License](#-license)
 
+
+## Schema'S ER Diagram : 
+[LawBridge Schema Diagram](https://dbdocs.io/officialdslc1552005/LawBridgeSchema?view=relationships)
+
 ## ✨ Features
 
 ### User Features
@@ -76,11 +80,11 @@ LawBridge is a comprehensive full-stack legal services platform that connects us
 
 ### AI Chatbot
 - **Framework**: FastAPI (Python)
-- **Vector Database**: ChromaDB
-- **Embeddings**: Sentence Transformers
-- **LLM**: Groq API (Llama 3 models)
+- **Vector Database**: Pinecone
+- **Embeddings**: Google Embedding Model 004
+- **LLM**: Google Gemini 2.5 Flash API
 - **Document Processing**: LangChain
-- **RAG Implementation**: Custom implementation with Indian Constitutional Law corpus 
+- **RAG Implementation**: Custom implementation with Indian Constitutional Law corpus
 
 ### Admin Panel
 - **Framework**: React with Vite
@@ -135,6 +139,7 @@ Law_Bridge_FullStack/
 ├── LICENSE                   # MIT License
 └── README.md                 # This file
 ```
+
 
 ## 📦 Prerequisites
 

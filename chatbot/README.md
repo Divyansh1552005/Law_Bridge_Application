@@ -6,9 +6,9 @@ A RAG (Retrieval Augmented Generation) chatbot system for legal document queryin
 
 - PDF document loading and processing
 - Text chunking and embedding creation
-- Vector storage with Pinecone
+- Vector database: Pinecone
 - FastAPI-based chat API
-- Google Gemini integration for LLM responses
+- LLM: Google Gemini 2.5 Flash API
 
 ## Setup
 

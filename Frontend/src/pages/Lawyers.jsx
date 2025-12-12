@@ -33,7 +33,7 @@ const Lawyers = () => {
         </button>
 
         <div className={`flex-col gap-4 text-sm text-gray-600 ${showFilter ? 'flex' : 'hidden sm:flex'}`}>
-          {['Criminal Lawyer', 'Civil Lawyer', 'Corporate Lawyer', 'Family Lawyer', 'Tax Lawyer', 'Intellectual Property Lawyer'].map((spec, index) => (
+          {['Criminal Lawyer', 'Civil Litigation Lawyer', 'Corporate Lawyer', 'Family & Divorce Lawyer', 'Tax Lawyer', 'Intellectual Property Lawyer'].map((spec, index) => (
             <p
               key={index}
               onClick={() => speciality === spec ? navigate('/lawyers') : navigate(`/lawyers/${spec}`)}

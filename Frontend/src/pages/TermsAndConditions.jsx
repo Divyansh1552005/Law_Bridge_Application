@@ -12,85 +12,95 @@ const TermsAndConditions = () => {
         <section>
           <h2 className='text-2xl font-semibold mb-4 text-gray-800'>Acceptance of Terms</h2>
           <p className='mb-4'>
-            By accessing and using Cure Desk platform, you accept and agree to be bound by the terms and 
-            provision of this agreement. If you do not agree to abide by the above, please do not use this service.
+            By accessing and using the LawBridge platform, you acknowledge that you have read, 
+            understood, and agree to be bound by these Terms and Conditions. If you do not agree, 
+            you must discontinue use of the platform immediately.
           </p>
         </section>
 
         <section>
           <h2 className='text-2xl font-semibold mb-4 text-gray-800'>Service Description</h2>
           <p className='mb-4'>
-            Cure Desk is a medical appointment booking platform that connects patients with healthcare providers. 
-            We facilitate appointment scheduling but do not provide medical services directly.
+            LawBridge is a legal consultation and appointment-booking platform that connects users 
+            with lawyers and legal professionals. We facilitate scheduling, communication, and 
+            discovery of legal services but do not provide legal advice ourselves.
           </p>
         </section>
 
         <section>
           <h2 className='text-2xl font-semibold mb-4 text-gray-800'>User Responsibilities</h2>
-          <p className='mb-4'>As a user of Cure Desk, you agree to:</p>
+          <p className='mb-4'>As a user of LawBridge, you agree to:</p>
           <ul className='list-disc pl-6 space-y-2'>
-            <li>Provide accurate and complete information when creating your account</li>
-            <li>Keep your account credentials secure and confidential</li>
-            <li>Attend scheduled appointments or cancel them within the specified timeframe</li>
-            <li>Treat healthcare providers and staff with respect and courtesy</li>
-            <li>Pay applicable fees for appointments and services</li>
-            <li>Comply with all applicable laws and regulations</li>
+            <li>Provide accurate, updated, and complete information during registration</li>
+            <li>Maintain the confidentiality of your account credentials</li>
+            <li>Attend scheduled consultations or cancel them within the specified timeframe</li>
+            <li>Treat legal professionals with respect and professionalism</li>
+            <li>Pay applicable consultation or service fees</li>
+            <li>Use the platform only for lawful purposes and comply with all applicable regulations</li>
           </ul>
         </section>
 
         <section>
           <h2 className='text-2xl font-semibold mb-4 text-gray-800'>Appointment Booking and Cancellation</h2>
           <p className='mb-4'>
-            When you book an appointment through our platform, you enter into a direct relationship with the healthcare provider. 
-            Appointment cancellations must be made at least 24 hours in advance to avoid cancellation fees.
+            When you book a consultation through LawBridge, you enter into a direct 
+            relationship with the selected lawyer or legal professional. 
+            Cancellations must be made at least 24 hours prior to the scheduled time 
+            to avoid cancellation charges or penalties.
           </p>
         </section>
 
         <section>
           <h2 className='text-2xl font-semibold mb-4 text-gray-800'>Payment Terms</h2>
           <p className='mb-4'>
-            Payment for appointments is due at the time of booking unless otherwise specified. We accept various 
-            payment methods including credit cards and digital payments. Refunds are subject to our refund policy.
+            Payments for legal consultations or related services are due at the time of 
+            booking unless otherwise specified. We support multiple secure digital payment 
+            methods. Refunds, if applicable, will be processed according to our refund policy.
           </p>
         </section>
 
         <section>
-          <h2 className='text-2xl font-semibold mb-4 text-gray-800'>Medical Disclaimer</h2>
+          <h2 className='text-2xl font-semibold mb-4 text-gray-800'>Legal Disclaimer</h2>
           <p className='mb-4'>
-            Cure Desk is not a healthcare provider and does not practice medicine. We do not provide medical advice, 
-            diagnosis, or treatment. All medical decisions should be made in consultation with qualified healthcare professionals.
+            LawBridge does not offer legal advice, representation, or any form of legal service. 
+            All advice, opinions, and services are provided solely by independent lawyers or 
+            legal professionals. We are not responsible for the accuracy, quality, or outcome 
+            of any legal consultation.
           </p>
         </section>
 
         <section>
           <h2 className='text-2xl font-semibold mb-4 text-gray-800'>Limitation of Liability</h2>
           <p className='mb-4'>
-            Cure Desk shall not be liable for any direct, indirect, incidental, special, or consequential damages 
-            resulting from the use or inability to use our platform or services.
+            LawBridge shall not be held liable for any direct, indirect, incidental, or 
+            consequential damages arising from your use of the platform, appointment 
+            outcomes, or interactions with legal professionals.
           </p>
         </section>
 
         <section>
           <h2 className='text-2xl font-semibold mb-4 text-gray-800'>Account Termination</h2>
           <p className='mb-4'>
-            We reserve the right to terminate or suspend your account at any time for violation of these terms or 
-            for any other reason deemed necessary to protect our platform and users.
+            We reserve the right to suspend or terminate your account at any time for 
+            violations of these Terms and Conditions, misuse of the platform, or any 
+            activity deemed harmful to the platform or its users.
           </p>
         </section>
 
         <section>
           <h2 className='text-2xl font-semibold mb-4 text-gray-800'>Changes to Terms</h2>
           <p className='mb-4'>
-            We reserve the right to modify these terms at any time. Changes will be effective immediately upon posting. 
-            Your continued use of the platform constitutes acceptance of the modified terms.
+            LawBridge may update or modify these Terms and Conditions at any time. 
+            Changes become effective immediately upon posting. Continued use of the 
+            platform constitutes acceptance of the updated terms.
           </p>
         </section>
 
         <section>
           <h2 className='text-2xl font-semibold mb-4 text-gray-800'>Contact Information</h2>
           <p className='mb-4'>
-            If you have any questions about these Terms and Conditions, please contact us at legal@curedesk.com 
-            or through our contact page.
+            For questions or concerns regarding these Terms and Conditions, 
+            you may contact us at legal@lawbridge.com or through our support page.
           </p>
         </section>
 

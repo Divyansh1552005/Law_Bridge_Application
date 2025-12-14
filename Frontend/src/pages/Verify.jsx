@@ -35,9 +35,7 @@ const Verify = () => {
     if (token) verifyEmail();
   }, [token]);
 
-  // =====================
   // RESEND VERIFICATION
-  // =====================
   const handleResend = async () => {
     try {
       setResendStatus("sending");
@@ -105,7 +103,6 @@ const Verify = () => {
             </h2>
             <p className="mt-2 text-gray-600">{message}</p>
 
-            {/* 🔥 RESEND EMAIL WITH LOADING STATE */}
             <button
               onClick={handleResend}
               disabled={resendStatus !== "idle"}

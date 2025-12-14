@@ -6,21 +6,31 @@ import { useNavigate } from 'react-router-dom'
 
 const Login = () => {
 
-  // login / signup toggle
   const [state, setState] = useState('Sign Up')
 
-  // inputs
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
-  // UI states
   const [showResend, setShowResend] = useState(false)
   const [showForgot, setShowForgot] = useState(false)
+  // loading link for logging
   const [loading, setLoading] = useState(false)
+  // loading state for send reset password email link
+  const [forgotLoading, setForgotLoading] = useState(false)
 
   const navigate = useNavigate()
   const { backendUrl, setToken } = useContext(AppContext)
+
+
+  // PASSWORD CHECKS - will make the signup available only if 
+  const hasUpper = /[A-Z]/.test(password)
+  const hasLower = /[a-z]/.test(password)
+  const hasSpecial = /[^A-Za-z0-9]/.test(password)
+  const hasLength = password.length >= 8
+
+  const passwordValid =
+    hasUpper && hasLower && hasSpecial && hasLength
 
   // =====================
   // SUBMIT HANDLER
@@ -31,10 +41,14 @@ const Login = () => {
     setShowResend(false)
     setShowForgot(false)
 
-    // =====================
     // SIGN UP
-    // =====================
     if (state === 'Sign Up') {
+      if (!passwordValid) {
+        toast.error('Password does not meet requirements')
+        setLoading(false)
+        return
+      }
+
       try {
         const { data } = await api.post(
           backendUrl + '/api/user/signup',
@@ -63,9 +77,7 @@ const Login = () => {
       return
     }
 
-    // =====================
     // LOGIN
-    // =====================
     try {
       const { data } = await api.post(
         backendUrl + '/api/user/login',
@@ -82,7 +94,6 @@ const Login = () => {
       const status = error.response?.status
       const msg = error.response?.data?.message
 
-      // email not verified
       if (status === 403 && msg?.toLowerCase().includes('verify')) {
         toast.error(msg)
         setShowResend(true)
@@ -129,6 +140,8 @@ const Login = () => {
       return
     }
 
+    setForgotLoading(true)
+
     try {
       const { data } = await api.post(
         backendUrl + '/api/user/forgot-password',
@@ -144,6 +157,8 @@ const Login = () => {
         error.response?.data?.message ||
         'Could not send reset email'
       )
+    } finally {
+      setForgotLoading(false)
     }
   }
 
@@ -192,10 +207,31 @@ const Login = () => {
             type="password"
             required
           />
+
+          {/* PASSWORD RULES (SIGN UP ONLY) */}
+          {state === 'Sign Up' && (
+            <ul className='mt-2 text-xs'>
+              <li className={hasLength ? 'text-green-600' : 'text-red-500'}>
+                {hasLength ? '✔' : '✖'} At least 8 characters
+              </li>
+              <li className={hasUpper ? 'text-green-600' : 'text-red-500'}>
+                {hasUpper ? '✔' : '✖'} One uppercase letter
+              </li>
+              <li className={hasLower ? 'text-green-600' : 'text-red-500'}>
+                {hasLower ? '✔' : '✖'} One lowercase letter
+              </li>
+              <li className={hasSpecial ? 'text-green-600' : 'text-red-500'}>
+                {hasSpecial ? '✔' : '✖'} One special character
+              </li>
+            </ul>
+          )}
         </div>
 
         <button
-          disabled={loading}
+          disabled={
+            loading ||
+            (state === 'Sign Up' && !passwordValid)
+          }
           className='bg-primary text-white w-full py-2 my-2 rounded-md text-base disabled:opacity-60'
         >
           {loading
@@ -223,9 +259,10 @@ const Login = () => {
             <button
               type="button"
               onClick={handleForgotPassword}
-              className='mt-2 bg-primary text-white px-4 py-1 rounded-md'
+              disabled={forgotLoading}
+              className='mt-2 bg-primary text-white px-4 py-1 rounded-md disabled:opacity-60'
             >
-              Send reset email
+              {forgotLoading ? 'Sending...' : 'Send reset email'}
             </button>
           </div>
         )}

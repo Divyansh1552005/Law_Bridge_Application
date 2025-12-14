@@ -272,7 +272,7 @@ export const getUserProfile = async (req, res) => {
       user,
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -354,13 +354,13 @@ export const updateUserProfile = async (req, res) => {
       userId: req.body.userId || req.user?.id
     };
 
-    console.log('Update profile request body:', bodyToValidate); // Debug log
+    // console.log('Update profile request body:', bodyToValidate); 
 
     const { success, data, error } =
       await updatePatchRequestBodySchemaforUser.safeParseAsync(bodyToValidate);
 
     if (!success) {
-      console.log('Validation error:', error.format()); // Debug log
+      // console.log('Validation error:', error.format()); // Debug log
       return res.status(400).json({
         error: error.format(),
         success: false,
@@ -409,7 +409,7 @@ export const updateUserProfile = async (req, res) => {
     });
 
   } catch (err) {
-    console.log("Error in updateUserProfile:", err);
+    // console.log("Error in updateUserProfile:", err);
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
@@ -487,7 +487,7 @@ export const bookAppointment = async (req, res) => {
 
     res.status(201).json({ success: true, message: "Appointment Booked! Pay online to complete the booking!" });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -512,7 +512,7 @@ export const listAppointment = async (req, res) => {
       appointments,
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -552,7 +552,7 @@ export const cancelAppointment = async (req, res) => {
 
     res.status(200).json({ success: true, message: "Appointment Cancelled" });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -590,7 +590,7 @@ export const paymentRazorpay = async (req, res) => {
 
     res.status(200).json({ success: true, order });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -610,7 +610,7 @@ export const verifyRazorpay = async (req, res) => {
       res.status(400).json({ success: false, message: "Payment Failed" });
     }
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(500).json({ success: false, message: error.message });
   }
 };

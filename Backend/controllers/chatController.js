@@ -13,7 +13,7 @@ export const createChat = async (req, res) => {
       messages: [],
     });
 
-    console.log("New chat created:", newChat);
+    // console.log("New chat created:", newChat);
 
     res.status(201).json({
       success: true,
@@ -33,7 +33,7 @@ export const getChat = async (req, res) => {
 
     const chat = await conversationModel.findOne({ sessionId, userId });
 
-    console.log("CHAT FETCHED:", chat);
+    // console.log("CHAT FETCHED:", chat);
 
     res.status(200).json({
       success: true,
@@ -94,7 +94,7 @@ export const updateChatTitle = async (req, res) => {
       });
     }
 
-    console.log(`Chat title updated for sessionId ${sessionId}`);
+    // console.log(`Chat title updated for sessionId ${sessionId}`);
     res.status(200).json({
       success: true,
       message: "Chat title updated",

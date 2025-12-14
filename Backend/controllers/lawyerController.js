@@ -25,7 +25,7 @@ export const changeAvailability = async (req, res) => {
 
         res.status(200).json({ success: true, message: `Lawyer is now ${lawyer.available ? 'available' : 'unavailable'}` })
     }catch(error){
-        console.log(error)
+        // console.log(error)
         res.status(500).json({ success: false, message: error.message })
     }
 }
@@ -38,7 +38,7 @@ export const getLawyerList = async (req, res) => {
         const lawyers = await lawyerModel.find({}).select("-password");
         res.status(200).json({ success: true, lawyers })
     }catch(error){
-        console.log(error)
+        // console.log(error)
         res.status(500).json({ success: false, message: error.message })
     }
 }
@@ -105,7 +105,7 @@ export const getLawyerAppointments = async (req, res) => {
         res.status(200).json({ success: true, appointments });
         
     }catch(error){
-        console.log(error)
+        // console.log(error)
         res.status(500).json({ success: false, message: error.message })
     }
 }
@@ -181,7 +181,7 @@ export const appointmentCompletedByLawyer = async (req, res) => {
         res.status(400).json({ success: false, message: 'Appointment Cancelled' })
         
     }catch(error){
-        console.log(error)
+        // console.log(error)
         res.status(500).json({ success: false, message: error.message })
     }
 }
@@ -205,7 +205,7 @@ export const getLawyerProfile = async (req, res) => {
         res.status(200).json({ success: true, profileData: lawyer });
         
     }catch(error){
-        console.log(error)
+        // console.log(error)
         res.status(500).json({ success: false, message: error.message })
     }
 }

@@ -41,7 +41,7 @@ export const updatePatchRequestBodySchemaforUser = z.object({
     })
     .optional(),
 
-  gender: z.enum(["Male", "Female", "Other", "Not Selected"]).optional(),
+  gender: z.enum(["Male", "Female", "Others", "Not Selected", "Rather Not Say"]).optional(),
 
   address: z
     .union([

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { type } from "node:os";
 
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
@@ -9,6 +10,16 @@ const userSchema = new mongoose.Schema({
     gender: { type: String, default: 'Not Selected' },
     dob: { type: String, default: 'Not Selected' },
     password: { type: String, required: true },
+    
+    // email verification things
+    emailVerified : {type : Boolean, default : false},
+    emailVerificationToken : {type : String},
+    emailVerificationExpiry : {type : Date},
+    
+    // forgot password things
+    resetPasswordToken: {type : String},
+    resetPasswordExpiry: {type : Date},
+
 })
 
 // checking if model already exists (to avoid recompilation error in dev env)

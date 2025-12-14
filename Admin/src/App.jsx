@@ -15,7 +15,6 @@ import LawyerAppointments from './pages/Lawyer/LawyerAppointments';
 import LawyerDashboard from './pages/Lawyer/LawyerDashboard';
 import LawyerProfile from './pages/Lawyer/LawyerProfile';
 import LawyerVideoCall from './pages/Lawyer/LawyerVideoCall.jsx';
-
 function App() {
   const adminContext = useContext(AdminContext);
   const lawyerContext = useContext(LawyerContext);

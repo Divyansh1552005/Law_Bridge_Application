@@ -19,7 +19,8 @@ import Chatbot from './pages/Chatbot.jsx'
 import Resources from './pages/Resources.jsx'
 import VideoCall from './pages/VideoCall.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx';
-import {ToastContainer, toast} from "react-toastify";
+import Verify from "./pages/Verify.jsx"
+import {ToastContainer} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 
@@ -57,6 +58,7 @@ function App() {
               <Route path="/refund-policy" element={<RefundPolicy />} />
               <Route path="/contact-us" element={<ContactUs />} />
               <Route path="/resources" element={<Resources />} />
+              <Route path="/verify-email/:token" element={<Verify />} />
             </Routes>
             <Footer />
           </div>

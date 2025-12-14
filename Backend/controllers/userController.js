@@ -6,10 +6,16 @@ import {
 import UserModel from "../models/userModel.js";
 import lawyerModel from "../models/lawyerModel.js";
 import appointmentModel from "../models/appointmentModel.js";
+import crypto from "crypto";
+import { generateCryptoToken } from "../utils/cryptoToken.js";
+import { sendEmail } from "../services/mailService.js";
+import { verifyEmailTemplate, resetPasswordTemplate } from "../services/emailTemplates.js";
 import { hashPasswordWithSalt, verifyPassword } from "../utils/hash.js";
 import { createToken } from "../utils/token.js";
 import { v2 as cloudinary } from "cloudinary";
 import razorpay from "razorpay";
+import { error } from "console";
+import userModel from "../models/userModel.js";
 
 // creating user controller for signup
 
@@ -39,22 +45,44 @@ export const signupUser = async (req, res) => {
 
     // now hashing the password
     const { password: hashedPassword } = await hashPasswordWithSalt(password);
-
+    
+    // generate crypto token for verification
+    const {rawToken, hashedToken} = generateCryptoToken();
+    
     // now creating new user
     const new_user = new UserModel({
       name,
       email,
       password: hashedPassword,
+      emailVerificationToken: hashedToken,
+      emailVerificationExpiry: Date.now() + 24 * 60 * 60 * 1000,
     });
 
     await new_user.save();
+    
+    // send verification email
+    const verifyLink = `${process.env.FRONTEND_URL}/verify-email/${rawToken}`;
+    
+    await sendEmail({
+         to: email,
+         subject: "Verify your email",
+         html: verifyEmailTemplate(verifyLink),
+       });
+    
 
     // ab token create karna hai for that user
-    const token = await createToken({ id: new_user._id.toString() });
+    // const token = await createToken({ id: new_user._id.toString() });
+    // return res.status(201).json({
+    //   message: "User created successfully",
+    //   success: true,
+    //   token,
+    // });
+    
+    
+    // token will be created only in login and emailVerified == true par 
     return res.status(201).json({
-      message: "User created successfully",
+      message: "Signup successful. Please verify your email.",
       success: true,
-      token,
     });
   } catch (error) {
     console.error("Error in signupUser:", error);
@@ -85,8 +113,17 @@ export const loginUser = async (req, res) => {
     const existingUser = await UserModel.findOne({ email });
     if (!existingUser) {
       return res.status(404).json({
-        error: "User does not exist with the given email",
+        message: "User does not exist with the given email",
         success: false,
+      });
+    }
+    
+    // check if email is verified for login
+    if (!existingUser.emailVerified) {
+      return res.status(403).json({
+        message: "Please verify your email before logging in",
+        // we will show resend email button in frontend if user has not verified email
+        action : "RESEND VERIFICATION EMAIL"
       });
     }
 
@@ -119,6 +156,39 @@ export const loginUser = async (req, res) => {
   }
 };
 
+// verification of email
+export const verifyEmail = async (req,res) =>{
+  try{
+    // becoz zod changed it to obj
+    const token = String(req.params.token);
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    
+    const user = await userModel.findOne({
+      emailVerificationToken: hashedToken,
+      emailVerificationExpiry: { $gt: Date.now() },
+    })
+    
+    
+    if (!user) {
+          return res.status(400).json({ message: "Invalid or expired token" });
+        }
+    
+        user.emailVerified = true;
+        user.emailVerificationToken = undefined;
+        user.emailVerificationExpiry = undefined;
+    
+        await user.save();
+
+        
+        res.status(201).json({message : "Email Verified Successfully!!!"})
+    
+    
+  }catch(error){
+    res.status(500).json({
+      message : error.message
+    })
+  }
+}
 // get user data for profile page
 export const getUserProfile = async (req, res) => {
   try {
@@ -153,6 +223,72 @@ export const getUserProfile = async (req, res) => {
     });
   }
 };
+
+// forgot password ie we will send reset link to the user if they exist
+export const forgotPassword = async (req,res) => {
+  try{
+    const { email } = req.body;
+    
+    const user = await userModel.findOne({ email });
+     if (!user){
+       return res.status(404).json({ message: "No user with the email exists!!" });
+    }
+     
+    const { rawToken, hashedToken } = generateCryptoToken();
+    
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpiry = Date.now() + 15 * 60 * 1000;
+    await user.save();
+    
+    const resetLink =
+        `${process.env.FRONTEND_URL}/reset-password/${rawToken}`;
+    
+      await sendEmail({
+        to: email,
+        subject: "Reset your password",
+        html: resetPasswordTemplate(resetLink),
+      });
+    
+      res.status(200).json({ message: "Reset password email sent" });
+     
+  }catch(error){
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}
+
+// now we will have to reset the password from the link sent by forgot password
+export const resetPassword = async (req, res) =>{
+   const { token } = req.params;
+   const { password } = req.body;
+   
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+  
+  // find the user jiska resetpasswordToken hash token se mil jaaye and expire na hua ho
+  const user = await userModel.findOne({
+    resetPasswordToken: hashedToken,
+    // this checks ki vo user nikalo jinki resetPasswordExpiry is greater than current time ie time limit mein hai na vo abhi
+    resetPasswordExpiry: { $gt: Date.now() },
+  })
+  
+  if (!user){
+      return res.status(400).json({ message: "Invalid or expired reset token" });
+  }
+  
+    const { password: hashedPassword } = await hashPasswordWithSalt(password);
+  
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpiry = undefined;
+  
+    await user.save();
+  
+    res.status(201).json({ message: "Password reset successful" });
+}
+
+
 
 export const updateUserProfile = async (req, res) => {
   try {

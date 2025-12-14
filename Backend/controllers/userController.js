@@ -189,6 +189,62 @@ export const verifyEmail = async (req,res) =>{
     })
   }
 }
+
+// resend verification email
+export const resendVerificationEmail = async (req, res) => {
+  try {
+    
+    // TODO - Email verification mein agar purana link expire na hua ho toh agla mat bhejo
+    const { email } = req.body;
+
+    const user = await userModel.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+        success: false,
+      });
+    }
+
+    if (user.emailVerified) {
+      return res.status(400).json({
+        message: "Email is already verified",
+        success: false,
+      });
+    }
+
+    const { rawToken, hashedToken } = generateCryptoToken();
+
+    user.emailVerificationToken = hashedToken;
+    user.emailVerificationExpiry = Date.now() + 24 * 60 * 60 * 1000;
+    await user.save();
+
+    const verifyLink =
+      `${process.env.FRONTEND_URL}/verify-email/${rawToken}`;
+
+    await sendEmail({
+      to: email,
+      subject: "Verify your email",
+      html: verifyEmailTemplate(verifyLink),
+    });
+
+    res.status(200).json({
+      message: "Verification email resent",
+      success: true,
+    });
+  } catch (error) {
+    console.error("Resend verification error:", error);
+    res.status(500).json({
+      message: "Internal server error",
+      success: false,
+    });
+  }
+};
+
+
+
+
+
 // get user data for profile page
 export const getUserProfile = async (req, res) => {
   try {

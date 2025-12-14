@@ -13,7 +13,8 @@ import {
   verifyRazorpay,
   verifyEmail,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  resendVerificationEmail
 } from "../controllers/userController.js";
 const userRouter = express.Router();
 
@@ -29,6 +30,7 @@ userRouter.patch(
   upload.single("image"),
   updateUserProfile,
 );
+userRouter.post("/resend-verification", resendVerificationEmail);
 userRouter.post("/book-appointment", authUser, bookAppointment);
 userRouter.get("/appointments", authUser, listAppointment);
 userRouter.post("/cancel-appointment", authUser, cancelAppointment);

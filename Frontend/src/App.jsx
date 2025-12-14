@@ -19,6 +19,7 @@ import Chatbot from './pages/Chatbot.jsx'
 import Resources from './pages/Resources.jsx'
 import VideoCall from './pages/VideoCall.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+import ResetPassword from './pages/ResetPassword.jsx'
 import Verify from "./pages/Verify.jsx"
 import {ToastContainer} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -59,6 +60,7 @@ function App() {
               <Route path="/contact-us" element={<ContactUs />} />
               <Route path="/resources" element={<Resources />} />
               <Route path="/verify-email/:token" element={<Verify />} />
+              <Route path="/reset-password/:token" element={<ResetPassword />} />
             </Routes>
             <Footer />
           </div>

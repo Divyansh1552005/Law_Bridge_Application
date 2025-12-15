@@ -14,16 +14,16 @@ const Login = () => {
 
   const [showResend, setShowResend] = useState(false)
   const [showForgot, setShowForgot] = useState(false)
-  // loading link for logging
+
   const [loading, setLoading] = useState(false)
-  // loading state for send reset password email link
   const [forgotLoading, setForgotLoading] = useState(false)
 
   const navigate = useNavigate()
   const { backendUrl, setToken } = useContext(AppContext)
 
-
-  // PASSWORD CHECKS - will make the signup available only if 
+  // =====================
+  // PASSWORD VALIDATION
+  // =====================
   const hasUpper = /[A-Z]/.test(password)
   const hasLower = /[a-z]/.test(password)
   const hasSpecial = /[^A-Za-z0-9]/.test(password)
@@ -37,12 +37,14 @@ const Login = () => {
   // =====================
   const onSubmitHandler = async (event) => {
     event.preventDefault()
+
     setLoading(true)
     setShowResend(false)
     setShowForgot(false)
 
-    // SIGN UP
+    // ---------- SIGN UP ----------
     if (state === 'Sign Up') {
+
       if (!passwordValid) {
         toast.error('Password does not meet requirements')
         setLoading(false)
@@ -57,8 +59,9 @@ const Login = () => {
 
         if (data.success) {
           toast.success('Signup successful! Please verify your email.')
-          setState('Login')
+          navigate('/verify-email')
         }
+
       } catch (error) {
         const msg =
           error.response?.data?.error ||
@@ -71,13 +74,15 @@ const Login = () => {
         } else {
           toast.error(msg)
         }
+
       } finally {
         setLoading(false)
       }
+
       return
     }
 
-    // LOGIN
+    // ---------- LOGIN ----------
     try {
       const { data } = await api.post(
         backendUrl + '/api/user/login',
@@ -90,6 +95,7 @@ const Login = () => {
         toast.success('Login successful!')
         navigate('/')
       }
+
     } catch (error) {
       const status = error.response?.status
       const msg = error.response?.data?.message
@@ -100,6 +106,7 @@ const Login = () => {
       } else {
         toast.error(msg || 'Login failed')
       }
+
     } finally {
       setLoading(false)
     }
@@ -123,6 +130,7 @@ const Login = () => {
       if (data.success) {
         toast.success('Verification email sent again!')
       }
+
     } catch (error) {
       toast.error(
         error.response?.data?.message ||
@@ -152,21 +160,23 @@ const Login = () => {
         data.message || 'Password reset email sent!'
       )
       setShowForgot(false)
+
     } catch (error) {
       toast.error(
         error.response?.data?.message ||
         'Could not send reset email'
       )
+
     } finally {
       setForgotLoading(false)
     }
   }
 
   return (
-    <form onSubmit={onSubmitHandler} className='min-h-[80vh] flex items-center'>
-      <div className='flex flex-col gap-3 m-auto items-start p-8 min-w-[340px] sm:min-w-96 border rounded-xl text-[#5E5E5E] text-sm shadow-lg'>
+    <form onSubmit={onSubmitHandler} className="min-h-[80vh] flex items-center">
+      <div className="flex flex-col gap-3 m-auto items-start p-8 min-w-[340px] sm:min-w-96 border rounded-xl text-[#5E5E5E] text-sm shadow-lg">
 
-        <p className='text-2xl font-semibold'>
+        <p className="text-2xl font-semibold">
           {state === 'Sign Up' ? 'Create Account' : 'Login'}
         </p>
 
@@ -175,42 +185,41 @@ const Login = () => {
         </p>
 
         {state === 'Sign Up' && (
-          <div className='w-full'>
+          <div className="w-full">
             <p>Full Name</p>
             <input
-              onChange={(e) => setName(e.target.value)}
               value={name}
-              className='border border-[#DADADA] rounded w-full p-2 mt-1'
+              onChange={(e) => setName(e.target.value)}
+              className="border border-[#DADADA] rounded w-full p-2 mt-1"
               type="text"
               required
             />
           </div>
         )}
 
-        <div className='w-full'>
+        <div className="w-full">
           <p>Email</p>
           <input
-            onChange={(e) => setEmail(e.target.value)}
             value={email}
-            className='border border-[#DADADA] rounded w-full p-2 mt-1'
+            onChange={(e) => setEmail(e.target.value)}
+            className="border border-[#DADADA] rounded w-full p-2 mt-1"
             type="email"
             required
           />
         </div>
 
-        <div className='w-full'>
+        <div className="w-full">
           <p>Password</p>
           <input
-            onChange={(e) => setPassword(e.target.value)}
             value={password}
-            className='border border-[#DADADA] rounded w-full p-2 mt-1'
+            onChange={(e) => setPassword(e.target.value)}
+            className="border border-[#DADADA] rounded w-full p-2 mt-1"
             type="password"
             required
           />
 
-          {/* PASSWORD RULES (SIGN UP ONLY) */}
           {state === 'Sign Up' && (
-            <ul className='mt-2 text-xs'>
+            <ul className="mt-2 text-xs">
               <li className={hasLength ? 'text-green-600' : 'text-red-500'}>
                 {hasLength ? '✔' : '✖'} At least 8 characters
               </li>
@@ -228,11 +237,8 @@ const Login = () => {
         </div>
 
         <button
-          disabled={
-            loading ||
-            (state === 'Sign Up' && !passwordValid)
-          }
-          className='bg-primary text-white w-full py-2 my-2 rounded-md text-base disabled:opacity-60'
+          disabled={loading || (state === 'Sign Up' && !passwordValid)}
+          className="bg-primary text-white w-full py-2 my-2 rounded-md text-base disabled:opacity-60"
         >
           {loading
             ? 'Please wait...'
@@ -241,65 +247,64 @@ const Login = () => {
               : 'Login'}
         </button>
 
-        {/* Forgot password */}
         {state === 'Login' && (
           <p
             onClick={() => setShowForgot(!showForgot)}
-            className='text-sm text-primary underline cursor-pointer'
+            className="text-sm text-primary underline cursor-pointer"
           >
             Forgot password?
           </p>
         )}
 
         {state === 'Login' && showForgot && (
-          <div className='w-full text-sm'>
-            <p className='text-red-500'>
+          <div className="w-full text-sm">
+            <p className="text-red-500">
               We’ll send a password reset link to your email.
             </p>
             <button
               type="button"
               onClick={handleForgotPassword}
               disabled={forgotLoading}
-              className='mt-2 bg-primary text-white px-4 py-1 rounded-md disabled:opacity-60'
+              className="mt-2 bg-primary text-white px-4 py-1 rounded-md disabled:opacity-60"
             >
               {forgotLoading ? 'Sending...' : 'Send reset email'}
             </button>
           </div>
         )}
 
-        {/* Resend verification */}
         {state === 'Login' && showResend && (
-          <p className='text-sm text-red-500'>
+          <p className="text-sm text-red-500">
             Email not verified.&nbsp;
             <span
               onClick={handleResendVerification}
-              className='text-primary underline cursor-pointer'
+              className="text-primary underline cursor-pointer"
             >
               Resend verification email
             </span>
           </p>
         )}
 
-        {state === 'Sign Up'
-          ? <p>
-              Already have an account?{' '}
-              <span
-                onClick={() => setState('Login')}
-                className='text-primary underline cursor-pointer'
-              >
-                Login here
-              </span>
-            </p>
-          : <p>
-              Create a new account?{' '}
-              <span
-                onClick={() => setState('Sign Up')}
-                className='text-primary underline cursor-pointer'
-              >
-                Click here
-              </span>
-            </p>
-        }
+        {state === 'Sign Up' ? (
+          <p>
+            Already have an account?{' '}
+            <span
+              onClick={() => setState('Login')}
+              className="text-primary underline cursor-pointer"
+            >
+              Login here
+            </span>
+          </p>
+        ) : (
+          <p>
+            Create a new account?{' '}
+            <span
+              onClick={() => setState('Sign Up')}
+              className="text-primary underline cursor-pointer"
+            >
+              Click here
+            </span>
+          </p>
+        )}
 
       </div>
     </form>

@@ -20,6 +20,7 @@ import VideoCall from "./pages/VideoCall.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import ResetPassword from "./pages/ResetPassword.jsx";
 import Verify from "./pages/Verify.jsx";
+import VerifyEmail from "./pages/VerifyEmail.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -69,6 +70,7 @@ function App() {
                 <Route path="/lawyers" element={<Lawyers />} />
                 <Route path="/lawyers/:speciality" element={<Lawyers />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route

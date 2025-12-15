@@ -3,19 +3,18 @@ import {
   loginPostRequestBodySchema,
   updatePatchRequestBodySchemaforUser,
 } from "../validations/reqValidation.js";
-import UserModel from "../models/userModel.js";
+import userModel from "../models/userModel.js";
 import lawyerModel from "../models/lawyerModel.js";
 import appointmentModel from "../models/appointmentModel.js";
 import crypto from "crypto";
 import { generateCryptoToken } from "../utils/cryptoToken.js";
 import { sendEmail } from "../services/mailService.js";
-import { verifyEmailTemplate, resetPasswordTemplate } from "../services/emailTemplates.js";
+import { verifyEmailTemplate, resetPasswordTemplate, deleteAccountOtpTemplate } from "../services/emailTemplates.js";
 import { hashPasswordWithSalt, verifyPassword } from "../utils/hash.js";
 import { createToken } from "../utils/token.js";
 import { v2 as cloudinary } from "cloudinary";
 import razorpay from "razorpay";
-import { error } from "console";
-import userModel from "../models/userModel.js";
+import conversationModel from "../models/conversationModel.js";
 
 // creating user controller for signup
 
@@ -35,7 +34,7 @@ export const signupUser = async (req, res) => {
     const { name, email, password } = validationResult.data;
 
     // check if user already exists with the same email
-    const existingUser = await UserModel.findOne({ email });
+    const existingUser = await userModel.findOne({ email });
     if (existingUser) {
       return res.status(409).json({
         error: "User already exists with the same email",
@@ -50,7 +49,7 @@ export const signupUser = async (req, res) => {
     const {rawToken, hashedToken} = generateCryptoToken();
     
     // now creating new user
-    const new_user = new UserModel({
+    const new_user = new userModel({
       name,
       email,
       password: hashedPassword,
@@ -110,7 +109,7 @@ export const loginUser = async (req, res) => {
     const { email, password } = validationResult.data;
 
     // check if user exists with the email
-    const existingUser = await UserModel.findOne({ email });
+    const existingUser = await userModel.findOne({ email });
     if (!existingUser) {
       return res.status(404).json({
         message: "User does not exist with the given email",
@@ -258,7 +257,7 @@ export const getUserProfile = async (req, res) => {
       });
     }
 
-    const user = await UserModel.findById(userId).select("-password");
+    const user = await userModel.findById(userId).select("-password");
 
     if (!user) {
       return res.status(404).json({
@@ -401,7 +400,7 @@ export const updateUserProfile = async (req, res) => {
       updates.image = uploadResult.secure_url;
     }
 
-    await UserModel.findByIdAndUpdate(userId, updates, { new: true });
+    await userModel.findByIdAndUpdate(userId, updates, { new: true });
 
     return res.status(200).json({
       success: true,
@@ -463,7 +462,7 @@ export const bookAppointment = async (req, res) => {
       slots_booked[slotDate].push(slotTime);
     }
 
-    const userData = await UserModel.findById(userId).select("-password");
+    const userData = await userModel.findById(userId).select("-password");
 
     // remove booked slots from lawyer data so frontend does not receive it so vo dikaaye hi na uss slot ko jo booked hai
     delete lawyerData.slots_booked;
@@ -616,3 +615,96 @@ export const verifyRazorpay = async (req, res) => {
 };
 
 
+// delete account routes
+
+export const requestDeleteAccountOtp = async (req,res) =>{
+  try{
+    const userId = req.body.userId;
+    
+    const user = await userModel.findById(userId);
+    
+    if(!user){
+        return res.status(404).json({ message: 'User not found' })
+    }
+    
+    // generate the OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString()
+
+    // Hash OTP
+    const hashedOtp = crypto
+      .createHash('sha256')
+      .update(otp)
+      .digest('hex')
+
+    user.deleteOtp = hashedOtp
+    user.deleteOtpExpiresAt = Date.now() + 10 * 60 * 1000 // 10 mins
+
+    await user.save();
+    
+    await sendEmail({
+      to: user.email,
+      subject: "Confirm Account Deletion",
+      html: deleteAccountOtpTemplate(otp),
+    });
+    
+    res.status(201).json({
+          success: true,
+          message: 'OTP sent to your email'
+        })
+    
+    
+    
+  }catch(error){
+     res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+//now we need to verify that OTP
+export const verifyDeleteAccountOtp = async (req, res) => {
+  try {
+    const userId = req.body.userId || req.user?.id
+    const { otp } = req.body
+
+    if (!otp) {
+      return res.status(400).json({ message: 'OTP is required' })
+    }
+
+    const user = await userModel.findById(userId)
+    
+    if (!user || !user.deleteOtp) {
+      return res.status(400).json({ message: 'No delete request found' })
+    }
+    
+    
+    // check if otp is still valid or not
+    if (user.deleteOtpExpiresAt < Date.now()) {
+      return res.status(400).json({ message: 'OTP expired' })
+    }
+
+    const hashedOtp = crypto
+      .createHash('sha256')
+      .update(otp)
+      .digest('hex')
+
+    if (hashedOtp !== user.deleteOtp){
+      return res.status(400).json({ message: 'Invalid OTP' })
+    }
+    
+    // delete the user's all appointments
+    await appointmentModel.deleteMany({user : userId})
+    
+    // deleting chats
+    await conversationModel.deleteMany({ userId })
+    res.json({
+      success: true,
+      message: 'Account deleted successfully'
+    })
+    
+    // DELETE USER finally
+    await userModel.findByIdAndDelete(userId)
+
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: 'Account deletion failed' })
+  }
+}

@@ -8,8 +8,7 @@ const MyProfile = () => {
 
   const { token, backendUrl, userData, setUserData, loadUserProfileData } =
     useContext(AppContext)
-
-  const [isEdit, setIsEdit] = useState(false)
+    const [isEdit, setIsEdit] = useState(false)
   const [image, setImage] = useState(null)
   const [resetLoading, setResetLoading] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)

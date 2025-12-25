@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import api from "../api/axiosClient";
+import {resetPassword} from "../api/user.api"
 import { toast } from "react-toastify";
 
 const ResetPassword = () => {
@@ -22,10 +22,7 @@ const ResetPassword = () => {
     setLoading(true);
 
     try {
-      const { data } = await api.post(
-        `/api/user/reset-password/${token}`,
-        { password }
-      );
+      const { data } = await resetPassword(token, password);
 
       toast.success(data.message || "Password reset successful");
 

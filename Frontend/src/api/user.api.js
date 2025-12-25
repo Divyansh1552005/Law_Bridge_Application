@@ -69,3 +69,43 @@ export const forgotPassword = async (backendUrl, email) => {
     { email }
   );
 };
+
+
+
+// UPDATE USER PROFILE (multipart/form-data)
+export const updateUserProfile = async (
+  backendUrl,
+  token,
+  formData
+) => {
+  return api.patch(
+    `${backendUrl}/api/user/update-profile`,
+    formData,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data',
+      },
+    }
+  );
+}
+
+
+
+// RESET PASSWORD
+export const resetPassword = async (resetToken, password) => {
+  return api.post(
+    `/api/user/reset-password/${resetToken}`,
+    { password }
+  );
+};
+
+
+
+// VERIFY EMAIL
+export const verifyUserEmail = async (verificationToken) => {
+  return api.get(
+    `/api/user/verify-email/${verificationToken}`
+  );
+};
+

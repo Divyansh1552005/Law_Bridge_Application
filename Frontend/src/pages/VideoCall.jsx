@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { StreamVideo, StreamVideoClient, StreamCall, CallControls, SpeakerLayout, CallParticipantsList } from '@stream-io/video-react-sdk';
-import api from '../api/axiosClient';
 import { toast } from 'react-toastify';
+import {getVideoToken, joinVideoCall, leaveVideoCall} from "../api/video.api"
 import '@stream-io/video-react-sdk/dist/css/styles.css';
 
 const VideoCall = () => {
@@ -52,11 +52,7 @@ const VideoCall = () => {
       const token = localStorage.getItem('token');
       
       // Get Stream token and call details from backend
-      const { data } = await api.post(
-        backendUrl + '/api/video/get-token',
-        { appointmentId },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const { data } = await getVideoToken(backendUrl, token, appointmentId);
 
       if (!data.success) {
         toast.error(data.message);
@@ -109,11 +105,8 @@ const VideoCall = () => {
       setLoading(false);
 
       // Update call status to joined
-      await api.post(
-        backendUrl + '/api/video/update-status',
-        { appointmentId, action: 'join' },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await joinVideoCall(backendUrl, token, appointmentId);
+
 
     } catch (error) {
       console.error('Video call initialization error:', error);
@@ -131,11 +124,8 @@ const VideoCall = () => {
       const token = localStorage.getItem('token');
       
       // Update call status to left
-      await api.post(
-        backendUrl + '/api/video/update-status',
-        { appointmentId, action: 'leave' },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await leaveVideoCall(backendUrl, token, appointmentId);
+
 
       toast.success('Call ended');
       navigate('/my-appointments');

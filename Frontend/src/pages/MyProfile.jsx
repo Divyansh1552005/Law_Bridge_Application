@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react'
 import { AppContext } from '../context/AppContext'
 import DeleteAccountModal from './DeleteAccountModal'
 import api from '../api/axiosClient'
+import { updateUserProfile, forgotPassword } from '../api/user.api'
 import { toast } from 'react-toastify'
 
 const MyProfile = () => {
@@ -24,16 +25,11 @@ const MyProfile = () => {
       formData.append('dob', userData.dob)
       image && formData.append('image', image)
 
-      const { data } = await api.patch(
-        backendUrl + '/api/user/update-profile',
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data'
-          }
-        }
-      )
+      const { data } = await updateUserProfile(
+        backendUrl,
+        token,
+        formData
+      );
 
       if (data.success) {
         toast.success(data.message)
@@ -52,10 +48,8 @@ const MyProfile = () => {
   const handlePasswordReset = async () => {
     setResetLoading(true)
     try {
-      const { data } = await api.post(
-        backendUrl + '/api/user/forgot-password',
-        { email: userData.email }
-      )
+      const { data } = await forgotPassword(backendUrl, userData.email)
+      
       toast.success(data.message || 'Password reset email sent!')
     } catch {
       toast.error('Could not send reset email')

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../api/axiosClient";
 import { toast } from "react-toastify";
+import { verifyUserEmail, resendVerification} from "../api/user.api"
 
 const Verify = () => {
   const { token } = useParams();
@@ -17,9 +18,7 @@ const Verify = () => {
   useEffect(() => {
     const verifyEmail = async () => {
       try {
-        const { data } = await api.get(
-          `/api/user/verify-email/${token}`
-        );
+        const { data } = await verifyUserEmail(token)
 
         setStatus("success");
         setMessage(data.message || "Email verified successfully");
@@ -40,10 +39,7 @@ const Verify = () => {
     try {
       setResendStatus("sending");
 
-      const { data } = await api.post(
-        "/api/user/resend-verification",
-        { token }
-      );
+      const { data } = await resendVerification(token)
 
       toast.success(
         data.message || "Verification email sent"

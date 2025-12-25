@@ -1,17 +1,17 @@
-import {createContext} from 'react';
-import api from '../api/axiosClient'; 
-import {toast} from 'react-toastify';
-import {useEffect, useState} from 'react';
+import { useEffect, useState, createContext } from "react";
+import { toast } from "react-toastify";
 
+import { getLawyersData as fetchLawyersAPI } from "../api/lawyer.api";
+import { getUserProfileData } from "../api/user.api";
+import { createChat, getChatBySession } from "../api/chat.api";
 
 export const AppContext = createContext();
 
-const AppContextProvider = (props) =>{
-
-  const currencySymbol = '₹';
+const AppContextProvider = (props) => {
+  const currencySymbol = "₹";
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [lawyers, setLawyers] = useState([]);
-  const [token, setToken] = useState(localStorage.getItem('token') || null); // check localStorage for token first 
+  const [token, setToken] = useState(localStorage.getItem("token") || null); // check localStorage for token first
   const [userData, setUserData] = useState(false);
 
   // chatbot related states
@@ -19,28 +19,25 @@ const AppContextProvider = (props) =>{
   const [currentSession, setCurrentSession] = useState(null); // current active session chat
   const [loadingResponse, setLoadingResponse] = useState(false); // loading state for bot response
 
+  // LAWYER
   const getLawyersData = async () => {
     try {
-      const { data } = await api.get(backendUrl + '/api/lawyer/list');
+      const { data } = await fetchLawyersAPI(backendUrl);
       if (data.success) {
-          setLawyers(data.lawyers);
-      }else{
+        setLawyers(data.lawyers);
+      } else {
         toast.error(data.message);
       }
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
+  // USER
   const loadUserProfileData = async () => {
-
-      if(!token) return;
+    if (!token) return;
     try {
-      const { data } = await api.get(backendUrl + '/api/user/get-profile', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const { data } = await getUserProfileData(backendUrl, token);
       if (data.success) {
         setUserData(data.user);
       } else {
@@ -49,11 +46,9 @@ const AppContextProvider = (props) =>{
     } catch (error) {
       console.log(error);
     }
-  
-  }
+  };
 
-  
-
+  // CHAT
   // creating new chat
   const createNewChat = async () => {
     try {
@@ -64,48 +59,45 @@ const AppContextProvider = (props) =>{
 
       // Generate unique session ID
       const newSessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      setSessionId(newSessionId);  
-      
-      const { data } = await api.post(backendUrl + '/api/chat/create', {
-        sessionId: newSessionId
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      setSessionId(newSessionId);
+
+      const { data } = await createChat(backendUrl, token, newSessionId);
 
       if (data.success) {
-        const newSession = { sessionId: newSessionId, messages: [], _id: data.chatId };
+        const newSession = {
+          sessionId: newSessionId,
+          messages: [],
+          _id: data.chatId,
+        };
         setCurrentSession(newSession);
-        
+
         toast.success("New chat created");
         return newSessionId;
       } else {
         toast.error(data.message);
         return null;
       }
-      
     } catch (error) {
       toast.error("Error creating new chat session");
       console.log(error);
       return null;
     }
-  }
+  };
 
   const fetchUserChats = async (targetSessionId) => {
     try {
       const sessionToFetch = targetSessionId || sessionId;
-      
+
       if (!token || !sessionToFetch) {
-        console.log('Missing token or sessionId');
+        console.log("Missing token or sessionId");
         return;
       }
 
-      const { data } = await api.get(`${backendUrl}/api/chat/get/${sessionToFetch}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const { data } = await getChatBySession(
+        backendUrl,
+        token,
+        sessionToFetch,
+      );
 
       if (data.success) {
         setCurrentSession(data.chats);
@@ -114,16 +106,15 @@ const AppContextProvider = (props) =>{
         toast.error(data.message);
         return null;
       }
-      
     } catch (error) {
       toast.error("Error fetching chat session");
       console.log(error);
       return null;
     }
-  }
+  };
 
   const value = {
-    lawyers : lawyers,
+    lawyers: lawyers,
     getLawyersData,
     currencySymbol,
     token,
@@ -141,34 +132,26 @@ const AppContextProvider = (props) =>{
     fetchUserChats,
     loadingResponse,
     setLoadingResponse,
-  }
+  };
 
   // page load hote hi lawyers data leke aao
-  useEffect(()=>{
+  useEffect(() => {
     getLawyersData();
-  }, [])
+  }, []);
 
   // page load hote hi user profile data leke aao agar token available hai
   useEffect(() => {
     if (token) {
       loadUserProfileData();
-    }
-    else{
+    } else {
       // LOGOUT case
       setUserData(false);
     }
   }, [token]);
 
-
-  
-
-
-  return(
-    <AppContext.Provider value={value}>
-      {props.children}
-    </AppContext.Provider>
-  )
-}
-
+  return (
+    <AppContext.Provider value={value}>{props.children}</AppContext.Provider>
+  );
+};
 
 export default AppContextProvider;

@@ -1,10 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
-import api from '../api/axiosClient'
 import { toast } from 'react-toastify'
 import { assets } from '../assets/assets'
 import {Video} from "lucide-react"
+import { getUserAppointments as userAppointments, cancelAppointment as cancelTheAppointment } from '../api/appointment.api'
+import { createRazorpayPayment, verifyRazorpayPayment } from '../api/payment.api'
 
 const MyAppointments = () => {
 
@@ -37,12 +38,7 @@ const MyAppointments = () => {
                 return;
             }
 
-            const { data } = await api.get(backendUrl + '/api/user/appointments', {
-                headers: { 
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+            const { data } = await userAppointments(backendUrl, token);
 
             if (data.success) {
                 setAppointments(data.appointments); // No need to reverse, we're sorting on backend
@@ -63,9 +59,10 @@ const MyAppointments = () => {
 
         try {
 
-            const { data } = await api.post(backendUrl + '/api/user/cancel-appointment', { appointmentId }, { 
-                headers: {Authorization: `Bearer ${token}`,
-             } })
+          const { data } = await cancelTheAppointment(backendUrl,
+            token,
+            appointmentId);
+          
 
             if (data.success) {
                 toast.success(data.message)
@@ -96,9 +93,11 @@ const MyAppointments = () => {
                 // console.log(response)
 
                 try {
-                    const { data } = await api.post(backendUrl + "/api/user/verify-razorpay", response, {
-                        headers: { Authorization: `Bearer ${token}` }
-                     });
+                    const { data } = await verifyRazorpayPayment(
+                      backendUrl,
+                      token,
+                      response
+                    );
                     if (data.success) {
                         navigate('/my-appointments')
                         getUserAppointments()
@@ -116,9 +115,12 @@ const MyAppointments = () => {
     // Function to make payment using razorpay
     const appointmentRazorpay = async (appointmentId) => {
         try {
-            const { data } = await api.post(backendUrl + '/api/user/payment-razorpay', { appointmentId }, { 
-                headers: { Authorization: `Bearer ${token}` }
-             })
+            const { data } = await createRazorpayPayment(
+              backendUrl,
+              token,
+              appointmentId
+            );
+            
             if (data.success) {
                 initPay(data.order)
             }else{

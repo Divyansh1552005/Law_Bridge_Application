@@ -3,7 +3,7 @@ import { AppContext } from '../context/AppContext.jsx'
 import api from '../api/axiosClient'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
-
+import { resendVerification, signupUser, loginUser, forgotPassword } from '../api/user.api.js'
 const Login = () => {
 
   const [state, setState] = useState('Sign Up')
@@ -21,9 +21,7 @@ const Login = () => {
   const navigate = useNavigate()
   const { backendUrl, setToken } = useContext(AppContext)
 
-  // =====================
-  // PASSWORD VALIDATION
-  // =====================
+  // ===================== PASSWORD VALIDATION ==========================
   const hasUpper = /[A-Z]/.test(password)
   const hasLower = /[a-z]/.test(password)
   const hasSpecial = /[^A-Za-z0-9]/.test(password)
@@ -32,9 +30,7 @@ const Login = () => {
   const passwordValid =
     hasUpper && hasLower && hasSpecial && hasLength
 
-  // =====================
-  // SUBMIT HANDLER
-  // =====================
+  // ===================== SUBMIT HANDLER =====================
   const onSubmitHandler = async (event) => {
     event.preventDefault()
 
@@ -52,10 +48,7 @@ const Login = () => {
       }
 
       try {
-        const { data } = await api.post(
-          backendUrl + '/api/user/signup',
-          { name, email, password }
-        )
+        const { data } = await signupUser(backendUrl, name, email, password);
 
         if (data.success) {
           toast.success('Signup successful! Please verify your email.')
@@ -84,10 +77,7 @@ const Login = () => {
 
     // ---------- LOGIN ----------
     try {
-      const { data } = await api.post(
-        backendUrl + '/api/user/login',
-        { email, password }
-      )
+      const { data } = await loginUser(backendUrl, email, password);
 
       if (data.success) {
         localStorage.setItem('token', data.token)
@@ -122,10 +112,7 @@ const Login = () => {
     }
 
     try {
-      const { data } = await api.post(
-        backendUrl + '/api/user/resend-verification',
-        { email }
-      )
+      const { data } = await resendVerification(backendUrl, email);
 
       if (data.success) {
         toast.success('Verification email sent again!')
@@ -151,10 +138,7 @@ const Login = () => {
     setForgotLoading(true)
 
     try {
-      const { data } = await api.post(
-        backendUrl + '/api/user/forgot-password',
-        { email }
-      )
+      const { data } = await forgotPassword(backendUrl, email);
 
       toast.success(
         data.message || 'Password reset email sent!'

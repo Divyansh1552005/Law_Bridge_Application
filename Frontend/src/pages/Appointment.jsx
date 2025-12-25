@@ -3,8 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
 import { assets } from '../assets/assets'
 import RelatedLawyers from '../components/RelatedLawyers'
-import api from '../api/axiosClient'
 import { toast } from 'react-toastify'
+import { bookAppointment as bookTheAppointment } from '../api/appointment.api'
 
 const Appointment = () => {
 
@@ -106,9 +106,7 @@ const Appointment = () => {
 
         try {
 
-            const { data } = await api.post(backendUrl + '/api/user/book-appointment', { lawyerId, slotDate, slotTime }, {
-                headers: { Authorization: `Bearer ${token}` }
-            })
+            const { data } = await bookTheAppointment(backendUrl, token, lawyerId,slotDate, slotTime)
             if (data.success) {
                 toast.success(data.message)
                 getLawyersData()

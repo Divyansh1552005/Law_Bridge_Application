@@ -1,8 +1,8 @@
 import React, { useState, useContext } from 'react'
 import { AppContext } from '../context/AppContext'
-import api from '../api/axiosClient'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
+import { requestDeleteAccount, verifyDeleteAccount } from '../api/user.api'
 
 const DeleteAccountModal = ({ onClose }) => {
   const { backendUrl, token, setToken } = useContext(AppContext)
@@ -16,15 +16,7 @@ const DeleteAccountModal = ({ onClose }) => {
   const handleSendOtp = async () => {
     setLoading(true)
     try {
-      const { data } = await api.post(
-        backendUrl + '/api/user/delete-account/request',
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      )
+      const { data } = await requestDeleteAccount(backendUrl, token)
 
       if (data.success) {
         toast.success('OTP sent to your email')
@@ -48,15 +40,7 @@ const DeleteAccountModal = ({ onClose }) => {
 
     setLoading(true)
     try {
-      const { data } = await api.post(
-        backendUrl + '/api/user/delete-account/verify',
-        { otp },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      )
+      const { data } = await verifyDeleteAccount(backendUrl, token, otp)
 
       if (data.success) {
         toast.success('Account deleted successfully')

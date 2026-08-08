@@ -1,4 +1,5 @@
 import conversationModel from "../models/conversationModel.js";
+import messageModel from "../models/messageModel.js";
 import {
   createChatSchema,
   updateChatTitleSchema,
@@ -6,6 +7,10 @@ import {
 } from "../validations/chatValidation.js";
 import PDFDocument from "pdfkit";
 import { nanoid } from "nanoid";
+
+// getChat/getSharedChat me itne hi recent messages dikhate hain by default —
+// bahut purane/lambe sessions ka poora history load karne se bachne ke liye
+const MESSAGE_FETCH_LIMIT = 200;
 
 // Create a new chat session
 export const createChat = async (req, res) => {
@@ -27,7 +32,6 @@ export const createChat = async (req, res) => {
     const newChat = await conversationModel.create({
       userId,
       sessionId,
-      messages: [],
     });
 
     // console.log("New chat created:", newChat);
@@ -48,13 +52,24 @@ export const getChat = async (req, res) => {
     const userId = req.user.id;
     const { sessionId } = req.params;
 
-    const chat = await conversationModel.findOne({ sessionId, userId });
+    const chat = await conversationModel.findOne({ sessionId, userId }).lean();
 
-    // console.log("CHAT FETCHED:", chat);
+    if (!chat) {
+      return res.status(200).json({
+        success: true,
+        chats: { sessionId, messages: [] },
+      });
+    }
+
+    const messages = await messageModel
+      .find({ conversationId: chat._id })
+      .sort({ createdAt: 1 })
+      .limit(MESSAGE_FETCH_LIMIT)
+      .lean();
 
     res.status(200).json({
       success: true,
-      chats: chat || { sessionId, messages: [] },
+      chats: { ...chat, messages },
     });
   } catch (error) {
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -66,21 +81,23 @@ export const getUserChats = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // Get all user chats with basic info (sessionId, title, first message, timestamps)
+    // Get all user chats with basic info (sessionId, title, last message, timestamps)
+    // messageCount/lastMessagePreview are denormalized on the conversation doc,
+    // so this never has to touch the (much larger) message collection
     const chats = await conversationModel
       .find({ userId })
-      .select("sessionId title messages createdAt updatedAt")
+      .select(
+        "sessionId title messageCount lastMessagePreview createdAt updatedAt",
+      )
       .sort({ updatedAt: -1 }); // Latest first
 
-    // Format the response to include last message preview
     const formattedChats = chats.map((chat) => ({
       sessionId: chat.sessionId,
       title: chat.title,
-      lastMessage:
-        chat.messages.length > 0
-          ? chat.messages[chat.messages.length - 1].content.slice(0, 50) + "..."
-          : "New chat",
-      messageCount: chat.messages.length,
+      lastMessage: chat.lastMessagePreview
+        ? chat.lastMessagePreview.slice(0, 50) + "..."
+        : "New chat",
+      messageCount: chat.messageCount,
       createdAt: chat.createdAt,
       updatedAt: chat.updatedAt,
     }));
@@ -148,7 +165,14 @@ export const deleteChat = async (req, res) => {
     const userId = req.user.id;
     const { sessionId } = validationResult.data;
 
-    await conversationModel.deleteOne({ sessionId, userId });
+    const chat = await conversationModel.findOneAndDelete({
+      sessionId,
+      userId,
+    });
+
+    if (chat) {
+      await messageModel.deleteMany({ conversationId: chat._id });
+    }
 
     // console.log(`Chat with sessionId ${sessionId} deleted`);
     res.status(200).json({
@@ -169,13 +193,32 @@ export const exportAllChats = async (req, res) => {
 
     const conversations = await conversationModel
       .find({ userId })
-      .select("sessionId title messages createdAt updatedAt")
+      .select("sessionId title messageCount createdAt updatedAt")
       .sort({ updatedAt: -1 })
       .lean();
 
-    const filteredConversations = conversations.filter(
-      (conv) => conv.messages.length > 0
+    const nonEmptyConversations = conversations.filter(
+      (conv) => conv.messageCount > 0,
     );
+
+    // ek hi query se saare conversations ke messages fetch karo, phir group karo —
+    // export explicit/infrequent user action hai, so full history fetch yaha theek hai
+    const allMessages = await messageModel
+      .find({ conversationId: { $in: nonEmptyConversations.map((c) => c._id) } })
+      .sort({ createdAt: 1 })
+      .lean();
+
+    const messagesByConversation = new Map();
+    for (const msg of allMessages) {
+      const key = msg.conversationId.toString();
+      if (!messagesByConversation.has(key)) messagesByConversation.set(key, []);
+      messagesByConversation.get(key).push(msg);
+    }
+
+    const filteredConversations = nonEmptyConversations.map((conv) => ({
+      ...conv,
+      messages: messagesByConversation.get(conv._id.toString()) || [],
+    }));
 
     // JSON export
     if (format === "json") {
@@ -286,14 +329,21 @@ export const exportSingleChat = async (req, res) => {
     const { sessionId } = req.params;
     const format = req.query.format || "json";
 
-    const conversation = await conversationModel
+    const chat = await conversationModel
       .findOne({ userId, sessionId })
-      .select("sessionId title messages createdAt updatedAt")
+      .select("sessionId title messageCount createdAt updatedAt")
       .lean();
 
-    if (!conversation || conversation.messages.length === 0) {
+    if (!chat || chat.messageCount === 0) {
       return res.status(404).json({ success: false, message: "Chat not found" });
     }
+
+    const messages = await messageModel
+      .find({ conversationId: chat._id })
+      .sort({ createdAt: 1 })
+      .lean();
+
+    const conversation = { ...chat, messages };
 
     // JSON
     if (format === "json") {
@@ -407,19 +457,25 @@ export const getSharedChat = async (req, res) => {
 
     const conversation = await conversationModel
       .findOne({ shareToken, isPublic: true })
-      .select("title messages createdAt")
+      .select("title createdAt")
       .lean();
 
     if (!conversation) {
       return res.status(404).json({ success: false, message: "Shared chat not found" });
     }
 
+    const messages = await messageModel
+      .find({ conversationId: conversation._id })
+      .sort({ createdAt: 1 })
+      .limit(MESSAGE_FETCH_LIMIT)
+      .lean();
+
     return res.status(200).json({
       success: true,
       chat: {
         title: conversation.title || "Untitled",
         createdAt: conversation.createdAt,
-        messages: conversation.messages.map((msg) => ({
+        messages: messages.map((msg) => ({
           role: msg.role,
           content: msg.content,
           timestamp: msg.createdAt,

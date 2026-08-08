@@ -40,6 +40,7 @@ import { v2 as cloudinary } from "cloudinary";
 import { signUploadParams } from "../config/cloudinarySign.js";
 import razorpay from "razorpay";
 import conversationModel from "../models/conversationModel.js";
+import messageModel from "../models/messageModel.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/token.js";
 import { refreshCookieOptions } from "../utils/cookies.js";
 import jwt from "jsonwebtoken";
@@ -1593,6 +1594,11 @@ export const verifyDeleteAccountOtp = async (req, res) => {
     }
 
     if (user.deleteOtpExpiresAt < Date.now()) {
+      // stale OTP — clear it now instead of leaving it for the next request to overwrite
+      user.deleteOtp = undefined;
+      user.deleteOtpExpiresAt = undefined;
+      await user.save({ validateBeforeSave: false });
+
       return res.status(400).json({
         success: false,
         message: "OTP expired",
@@ -1647,6 +1653,7 @@ export const verifyDeleteAccountOtp = async (req, res) => {
     // delete user-related data first
     await appointmentModel.deleteMany({ userId });
     await conversationModel.deleteMany({ userId });
+    await messageModel.deleteMany({ userId });
 
     // delete user account
     await userModel.findByIdAndDelete(userId);

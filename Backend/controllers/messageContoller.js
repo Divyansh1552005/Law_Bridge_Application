@@ -1,9 +1,23 @@
 import axios from "axios";
 import conversationModel from "../models/conversationModel.js";
+import messageModel from "../models/messageModel.js";
 import User from "../models/userModel.js";
 import dotenv from "dotenv/config";
 import redis from "../config/redis.js";
 import { getMessageSchema } from "../validations/chatValidation.js";
+
+// RAG chatbot ko poora chat history bhejne ke bajaye sirf recent context bhejte hain —
+// isse token/latency cost bounded rehti hai jaise-jaise conversation lamba hota jaaye
+const CHATBOT_HISTORY_LIMIT = 20;
+
+const getRecentHistory = async (conversationId) => {
+  const recent = await messageModel
+    .find({ conversationId })
+    .sort({ createdAt: -1 })
+    .limit(CHATBOT_HISTORY_LIMIT)
+    .lean();
+  return recent.reverse();
+};
 
 // chat message
 // this is blocking ie isme ham pehle store krte hai convo fir user ko bhejte hai, user ko bhej kar fir backend mein save kr lenge after sending to user
@@ -122,24 +136,24 @@ export const getMessage = async (req, res) => {
     let chat = await conversationModel.findOne({ sessionId, userId });
 
     if (!chat) {
-      chat = await conversationModel.create({
-        userId,
-        sessionId,
-        messages: [],
-      });
+      chat = await conversationModel.create({ userId, sessionId });
     }
 
-    chat.messages.push({
+    await messageModel.create({
+      conversationId: chat._id,
+      userId,
       role: "user",
       content: message,
       attachedDocument: attachedDocument || null,
     });
 
+    const history = await getRecentHistory(chat._id);
+
     const chatbot_response = await axios.post(
       process.env.RAG_CHATBOT_API_URL + "/chat",
       {
         sessionId,
-        history: chat.messages,
+        history,
         message,
         user_id: userId,
         mode: "both",
@@ -176,11 +190,20 @@ export const getMessage = async (req, res) => {
       sources,
     });
 
-    // background save of conversation (non-blocking)
+    // background save of assistant reply + conversation summary (non-blocking)
     (async () => {
       try {
-        chat.messages.push(replyObject);
-        await chat.save();
+        await messageModel.create({
+          conversationId: chat._id,
+          userId,
+          ...replyObject,
+        });
+
+        await conversationModel.findByIdAndUpdate(chat._id, {
+          $inc: { messageCount: 2 },
+          lastMessageAt: new Date(),
+          lastMessagePreview: chatbot_reply.slice(0, 100),
+        });
       } catch (err) {
         console.error("Background chat save failed:", err.message);
       }

@@ -11,6 +11,9 @@ const appointmentSchema = new mongoose.Schema(
     amount: { type: Number, required: true },
     date: { type: Number, required: true },
     cancelled: { type: String, default: "Not Cancelled" },
+    // old cancelled/completed appointments get flagged (never deleted — financial/dispute records)
+    // so operational dashboards don't have to keep scanning years of history
+    archived: { type: Boolean, default: false, index: true },
     payment: { type: Boolean, default: false },
     razorpayPaymentId: { type: String, default: null },
     isCompleted: { type: Boolean, default: false },

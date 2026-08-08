@@ -1,58 +1,5 @@
 import mongoose from "mongoose";
 
-// ye schema sirf conversation context ke liye banaya hai
-const attachedDocumentSchema = new mongoose.Schema(
-  {
-    documentId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "document",
-      required: true,
-    },
-    filename: {
-      type: String,
-      required: true,
-    },
-    fileType: {
-      type: String,
-      enum: ["pdf", "docx", "txt", "image"],
-      required: true,
-    },
-  },
-  { _id: false }, // nested object hai, alag _id nahi chahiye
-);
-
-const sourceSchema = new mongoose.Schema(
-  {
-    title: { type: String, required: true },
-    url: { type: String, required: true },
-  },
-  { _id: false },
-);
-
-const messageSchema = new mongoose.Schema(
-  {
-    role: {
-      type: String,
-      enum: ["user", "assistant"],
-      required: true,
-    },
-    content: {
-      type: String,
-      required: true,
-    },
-    // Sirf user messages mein hoga, assistant ke liye null
-    attachedDocument: {
-      type: attachedDocumentSchema,
-      default: null,
-    },
-    sources: {
-      type: [sourceSchema],
-      default: [],
-    },
-  },
-  { timestamps: true },
-);
-
 const conversationSchema = new mongoose.Schema(
   {
     userId: {
@@ -68,7 +15,22 @@ const conversationSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
-    messages: [messageSchema],
+
+    // actual messages ab alag "message" collection mein hain (messageModel.js) —
+    // ye sirf denormalized summary fields hain taaki sidebar list (getUserChats)
+    // ko har baar poora message history load na karna pade
+    messageCount: {
+      type: Number,
+      default: 0,
+    },
+    lastMessageAt: {
+      type: Date,
+      default: null,
+    },
+    lastMessagePreview: {
+      type: String,
+      default: null,
+    },
 
     // public banane aali chize like if user wanna share their chat
 

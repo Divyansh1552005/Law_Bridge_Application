@@ -18,6 +18,8 @@ import { rateLimiter } from "./middleware/rateLimiter.js";
 import { setupSwagger } from "./config/swagger.js";
 import "./bullmq/workers/videoWorker.js";
 import "./bullmq/workers/emailWorker.js";
+import "./bullmq/workers/maintenanceWorker.js";
+import { scheduleMaintenanceJobs } from "./bullmq/jobs/maintenanceJobs.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -102,6 +104,10 @@ connectMongoDB(process.env.MONGODB_URI).then(() =>
   console.log("Mongo DB Connected!!"),
 );
 connectCloudinary().then(() => console.log("Cloudinary Connected!!"));
+
+scheduleMaintenanceJobs().catch((err) =>
+  console.error("Failed to schedule maintenance jobs:", err.message),
+);
 
 // api endpoints
 app.use("/api/auth", AuthRouter);

@@ -170,7 +170,8 @@ export const getLawyerAppointments = async (req, res) => {
     const limit = Math.min(parseInt(req.query.limit) || 10, 50);
     const skip = (page - 1) * limit;
 
-    const query = { lawyerId };
+    // archived (old cancelled/completed) appointments hidden from the default view
+    const query = { lawyerId, archived: { $ne: true } };
     const { status, sort } = req.query;
 
     if (status) {

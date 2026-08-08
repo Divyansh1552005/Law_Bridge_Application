@@ -1,11 +1,11 @@
 import express from "express";
 import authUser from "../middleware/authUser.js";
-import { uploadImage } from "../middleware/multer.js";
 import {
   signupUser,
   loginUser,
   getUserProfile,
   updateUserProfile,
+  getUserUploadSignature,
   listAppointment,
   cancelAppointment,
   verifyEmail,
@@ -46,12 +46,8 @@ userRouter.post(
 
 // fetch user profile or  update it
 userRouter.get("/get-profile", authUser, getUserProfile);
-userRouter.patch(
-  "/update-profile",
-  authUser,
-  uploadImage.single("image"),
-  updateUserProfile,
-);
+userRouter.post("/upload-signature", authUser, getUserUploadSignature);
+userRouter.patch("/update-profile", authUser, updateUserProfile);
 
 // resending verification email
 userRouter.post(

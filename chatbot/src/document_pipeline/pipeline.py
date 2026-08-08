@@ -20,17 +20,18 @@ def process_uploaded_document(
     file_bytes: bytes,
     filename: str,
     user_id: str,
-    cloudinary_url: str = None,
+    cloudinary_public_id: str = None,
 ) -> dict:
     """
     Uploaded document ka complete pipeline:
     bytes → detect → extract → chunk → embed → pinecone store
 
     Args:
-        file_bytes     : Raw bytes of the uploaded file
-        filename       : Original filename (e.g. "contract.pdf")
-        user_id        : User ka unique ID (namespace isolation ke liye)
-        cloudinary_url : Optional, metadata mein store hota hai
+        file_bytes            : Raw bytes of the uploaded file
+        filename               : Original filename (e.g. "contract.pdf")
+        user_id                : User ka unique ID (namespace isolation ke liye)
+        cloudinary_public_id   : Optional, metadata mein store hota hai (asset private hai,
+                                  isi se baad mein fresh signed URL generate hoti hai)
 
     Returns:
         {
@@ -73,8 +74,8 @@ def process_uploaded_document(
         "user_id": user_id,
         "file_type": file_type,
     }
-    if cloudinary_url:
-        metadata["cloudinary_url"] = cloudinary_url
+    if cloudinary_public_id:
+        metadata["cloudinary_public_id"] = cloudinary_public_id
 
     document = Document(page_content=text, metadata=metadata)
 

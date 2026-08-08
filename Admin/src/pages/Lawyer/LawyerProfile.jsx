@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import api from "../../api/axiosClient";
 import Loader from "../../components/common/Loader";
 import { Pencil, Save, X } from "lucide-react";
+import { uploadToCloudinaryDirect } from "../../utils/directCloudinaryUpload";
 
 const LawyerProfile = () => {
   const { profileData, setProfileData, getProfileData } =
@@ -18,17 +19,29 @@ const LawyerProfile = () => {
   const updateProfile = async () => {
     setSaving(true);
     try {
-      const formData = new FormData();
-      formData.append("address", JSON.stringify(profileData.address));
-      formData.append("fees", profileData.fees);
-      formData.append("about", profileData.about);
-      formData.append("available", profileData.available);
+      const payload = {
+        address: profileData.address,
+        fees: profileData.fees,
+        about: profileData.about,
+        available: profileData.available,
+      };
 
       if (imageFile) {
-        formData.append("image", imageFile);
+        const { data: signature } = await api.post(
+          "/api/lawyer/upload-signature",
+        );
+        if (!signature.success) {
+          toast.error(signature.message || "Could not start image upload");
+          return;
+        }
+        const cloudinaryResult = await uploadToCloudinaryDirect(
+          imageFile,
+          signature,
+        );
+        payload.imageUrl = cloudinaryResult.secure_url;
       }
 
-      const { data } = await api.patch("/api/lawyer/update-profile", formData);
+      const { data } = await api.patch("/api/lawyer/update-profile", payload);
 
       if (data.success) {
         toast.success(data.message);

@@ -1,8 +1,12 @@
 import { v2 as cloudinary } from "cloudinary";
-import FormData from "form-data";
 import axios from "axios";
 import documentModel from "../models/documentModel.js";
 import redis from "../config/redis.js";
+import {
+  signUploadParams,
+  getSignedDeliveryUrl,
+  getResourceType,
+} from "../config/cloudinarySign.js";
 
 const DAILY_UPLOAD_LIMIT = 2;
 
@@ -44,26 +48,37 @@ const getDailyUploadKey = (userId) => {
   return `doc_upload:${userId}:${today}`;
 };
 
-export const uploadDocument = async (req, res) => {
+const getUploadCountToday = async (userId) => {
+  const redisKey = getDailyUploadKey(userId);
+  return parseInt((await redis.get(redisKey)) || "0");
+};
+
+// Filename ko public_id mein safely embed karne ke liye
+const sanitizeFilename = (filename) =>
+  filename.replace(/[^a-zA-Z0-9._-]/g, "_");
+
+// Step 1 — client Cloudinary pe seedha upload karne se pehle signed params maangta hai
+export const getUploadSignature = async (req, res) => {
   try {
     const userId = req.user.id.toString();
+    const { filename, mimetype, size } = req.body;
 
-    if (!req.file) {
-      return res
-        .status(400)
-        .json({ success: false, message: "No file uploaded" });
+    if (!filename || !mimetype || !size) {
+      return res.status(400).json({
+        success: false,
+        message: "filename, mimetype aur size zaroori hain",
+      });
     }
 
-    const fileType = MIMETYPE_TO_FILETYPE[req.file.mimetype];
+    const fileType = MIMETYPE_TO_FILETYPE[mimetype];
     if (!fileType) {
       return res
         .status(400)
         .json({ success: false, message: "Unsupported file type" });
     }
 
-    // Extension wise size check
     const sizeLimit = EXTENSION_SIZE_LIMITS[fileType];
-    if (req.file.size > sizeLimit) {
+    if (size > sizeLimit) {
       const limitMB = sizeLimit / (1024 * 1024);
       return res.status(400).json({
         success: false,
@@ -71,10 +86,7 @@ export const uploadDocument = async (req, res) => {
       });
     }
 
-    // Daily limit check via Redis
-    const redisKey = getDailyUploadKey(userId);
-    const uploadCountToday = parseInt((await redis.get(redisKey)) || "0");
-
+    const uploadCountToday = await getUploadCountToday(userId);
     if (uploadCountToday >= DAILY_UPLOAD_LIMIT) {
       return res.status(429).json({
         success: false,
@@ -82,68 +94,104 @@ export const uploadDocument = async (req, res) => {
       });
     }
 
-    // Upload to Cloudinary
+    const resourceType = getResourceType(fileType);
+    const folder = `lawbridge/user-documents/${userId}`;
+    const publicId = `${Date.now()}-${sanitizeFilename(filename)}`;
+
+    const signedParams = signUploadParams({
+      folder,
+      public_id: publicId,
+      type: "authenticated",
+    });
+
+    return res.status(200).json({
+      success: true,
+      ...signedParams,
+      resourceType,
+      fileType,
+    });
+  } catch (error) {
+    console.error("getUploadSignature error:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
+
+// Step 2 — client ne seedha Cloudinary pe upload kar diya, ab RAG pipeline chalao
+export const confirmUpload = async (req, res) => {
+  const userId = req.user.id.toString();
+  const { publicId, resourceType, filename, fileType } = req.body;
+
+  if (!publicId || !resourceType || !filename || !fileType) {
+    return res.status(400).json({
+      success: false,
+      message: "publicId, resourceType, filename aur fileType zaroori hain",
+    });
+  }
+
+  // Client se aaya publicId sirf isi user ke folder ka hona chahiye
+  if (!publicId.startsWith(`lawbridge/user-documents/${userId}/`)) {
+    return res.status(400).json({ success: false, message: "Invalid publicId" });
+  }
+
+  try {
+    const uploadCountToday = await getUploadCountToday(userId);
+    if (uploadCountToday >= DAILY_UPLOAD_LIMIT) {
+      return res.status(429).json({
+        success: false,
+        message: `Daily upload limit reached (${DAILY_UPLOAD_LIMIT} uploads/day). Try again tomorrow.`,
+      });
+    }
+
+    // Verify asset actually exists on Cloudinary — client-supplied publicId ko blindly trust nahi karte
+    let asset;
+    try {
+      asset = await cloudinary.api.resource(publicId, {
+        resource_type: resourceType,
+        type: "authenticated",
+      });
+    } catch {
+      return res
+        .status(400)
+        .json({ success: false, message: "Uploaded asset not found" });
+    }
+
+    const signedUrl = getSignedDeliveryUrl(publicId, resourceType);
     const today = getLocalDateKey();
-
-    // PDF aur DOCX ke liye raw, images ke liye image
-    const resourceType = ["pdf", "docx", "txt"].includes(fileType)
-      ? "raw"
-      : "image";
-
-    const cloudinaryResult = await new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          resource_type: resourceType,
-          folder: `lawbridge/user-documents/${userId}`,
-          public_id: `${Date.now()}-${req.file.originalname}`,
-        },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        },
-      );
-      uploadStream.end(req.file.buffer);
-    });
-
-    // Call Python chatbot API
-    const formData = new FormData();
-    formData.append("file", req.file.buffer, {
-      filename: req.file.originalname,
-      contentType: req.file.mimetype,
-    });
-    formData.append("user_id", userId);
-    formData.append("cloudinary_url", cloudinaryResult.secure_url);
 
     let pythonResult;
     try {
       const pythonResponse = await axios.post(
         `${process.env.RAG_CHATBOT_API_URL}/upload-document`,
-        formData,
         {
-          headers: {
-            ...formData.getHeaders(),
-            secure_key: process.env.RAG_SECRET_KEY,
-          },
+          user_id: userId,
+          filename,
+          signed_url: signedUrl,
+          public_id: publicId,
+        },
+        {
+          headers: { secure_key: process.env.RAG_SECRET_KEY },
         },
       );
       pythonResult = pythonResponse.data;
     } catch (axiosError) {
       // Cloudinary pe upload ho gaya tha, clean up karo
-      await cloudinary.uploader.destroy(cloudinaryResult.public_id, {
+      await cloudinary.uploader.destroy(publicId, {
         resource_type: resourceType,
+        type: "authenticated",
       });
       const message =
         axiosError.response?.data?.detail || "Document processing failed";
       return res.status(500).json({ success: false, message });
     }
 
-    // Save to MongoDB
     const document = await documentModel.create({
       userId,
-      filename: req.file.originalname,
+      filename,
       fileType,
-      cloudinaryUrl: cloudinaryResult.secure_url,
-      cloudinaryPublicId: cloudinaryResult.public_id,
+      cloudinaryUrl: asset.secure_url,
+      cloudinaryPublicId: publicId,
       chunksStored: pythonResult.chunks_stored,
       pineconeNamespace: pythonResult.namespace,
       uploadDate: today,
@@ -151,6 +199,7 @@ export const uploadDocument = async (req, res) => {
 
     // Redis counter increment — set TTL only on first upload of the day
     // so the upload limit resets at midnight, same as chat credits.
+    const redisKey = getDailyUploadKey(userId);
     const newCount = await redis.incr(redisKey);
     if (newCount === 1) {
       await redis.expire(redisKey, getSecondsUntilMidnight());
@@ -163,14 +212,13 @@ export const uploadDocument = async (req, res) => {
         _id: document._id,
         filename: document.filename,
         fileType: document.fileType,
-        cloudinaryUrl: document.cloudinaryUrl,
         chunksStored: document.chunksStored,
         createdAt: document.createdAt,
       },
       uploadsRemaining: DAILY_UPLOAD_LIMIT - (uploadCountToday + 1),
     });
   } catch (error) {
-    console.error("uploadDocument error:", error);
+    console.error("confirmUpload error:", error);
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });
@@ -185,12 +233,11 @@ export const getUserDocuments = async (req, res) => {
 
     const documents = await documentModel
       .find({ userId })
-      .select("filename fileType cloudinaryUrl chunksStored createdAt")
+      .select("filename fileType chunksStored createdAt")
       .sort({ createdAt: -1 });
 
     // Daily uploads remaining from Redis
-    const redisKey = getDailyUploadKey(userId);
-    const uploadCountToday = parseInt((await redis.get(redisKey)) || "0");
+    const uploadCountToday = await getUploadCountToday(userId);
 
     return res.status(200).json({
       success: true,
@@ -200,6 +247,31 @@ export const getUserDocuments = async (req, res) => {
     });
   } catch (error) {
     console.error("getUserDocuments error:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
+
+// Ek document ke liye fresh signed URL — "View Document" / chat attachment ke liye
+export const getDocumentSignedUrl = async (req, res) => {
+  try {
+    const userId = req.user.id.toString();
+    const { id } = req.params;
+
+    const document = await documentModel.findById(id);
+    if (!document || document.userId.toString() !== userId) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Document not found" });
+    }
+
+    const resourceType = getResourceType(document.fileType);
+    const url = getSignedDeliveryUrl(document.cloudinaryPublicId, resourceType);
+
+    return res.status(200).json({ success: true, url });
+  } catch (error) {
+    console.error("getDocumentSignedUrl error:", error);
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });

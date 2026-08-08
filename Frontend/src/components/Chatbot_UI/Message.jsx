@@ -4,6 +4,8 @@ import Markdown from "react-markdown";
 import Prism from "prismjs";
 import moment from "moment";
 import remarkGfm from "remark-gfm";
+import { toast } from "react-toastify";
+import { getDocumentSignedUrl } from "../../api/document.api";
 
 // Custom table component for mobile responsiveness
 const ResponsiveTable = ({ children, ...props }) => (
@@ -24,6 +26,22 @@ const Message = ({ message }) => {
     Prism.highlightAll();
   }, [message.content]);
 
+  // documents are private on Cloudinary — fetch a fresh short-lived signed URL to view
+  const handleOpenAttachedDocument = async () => {
+    try {
+      const { data } = await getDocumentSignedUrl(
+        message.attachedDocument.documentId,
+      );
+      if (data.success) {
+        window.open(data.url, "_blank", "noopener,noreferrer");
+      } else {
+        toast.error(data.message || "Could not open document");
+      }
+    } catch {
+      toast.error("Could not open document");
+    }
+  };
+
   return (
     <div className="w-full">
       {message.role === "user" ? (
@@ -32,17 +50,16 @@ const Message = ({ message }) => {
           {/* Message content container */}
           <div className="flex flex-col gap-1 w-full sm:w-auto sm:max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl">
             {message.attachedDocument && (
-              <a
-                href={message.attachedDocument.cloudinaryUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                type="button"
+                onClick={handleOpenAttachedDocument}
                 className="flex items-center gap-2 mb-1 p-2 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl text-purple-700 text-sm transition-colors self-end w-fit max-w-full"
               >
                 <span className="flex-shrink-0">📎</span>
                 <span className="truncate font-medium">
                   {message.attachedDocument.filename}
                 </span>
-              </a>
+              </button>
             )}
             <div className="bg-[#A456F7] text-white p-3 sm:p-4 rounded-2xl rounded-br-md shadow-sm ml-auto sm:ml-0">
               <p className="text-base leading-relaxed break-words">

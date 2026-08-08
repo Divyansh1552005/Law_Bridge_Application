@@ -10,6 +10,27 @@ import mongoose from "mongoose";
 import { generateAccessToken, generateRefreshToken } from "../utils/token.js";
 import { refreshCookieOptions } from "../utils/cookies.js";
 import jwt from "jsonwebtoken";
+import { signUploadParams } from "../config/cloudinarySign.js";
+
+// Signed Cloudinary upload params for the profile-picture direct upload
+export const getLawyerUploadSignature = async (req, res) => {
+  try {
+    const lawyerId = req.lawyer.id;
+    const signedParams = signUploadParams({
+      folder: `lawbridge/profile-images/lawyer/${lawyerId}`,
+      public_id: `avatar-${Date.now()}`,
+      allowed_formats: "jpg,png",
+    });
+
+    return res
+      .status(200)
+      .json({ success: true, ...signedParams, resourceType: "image" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
+};
 
 export const changeAvailability = async (req, res) => {
   try {
@@ -427,19 +448,9 @@ export const updateLawyerProfile = async (req, res) => {
     if (available !== undefined) updates.available = available;
     if (about !== undefined) updates.about = about;
 
-    if (req.file) {
-      const { v2: cloudinary } = await import("cloudinary");
-      const imageUrl = await new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-          { resource_type: "image" },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result.secure_url);
-          },
-        );
-        uploadStream.end(req.file.buffer);
-      });
-      updates.image = imageUrl;
+    // img handling — client ne already Cloudinary pe seedha upload kar diya (presigned flow)
+    if (req.body.imageUrl) {
+      updates.image = req.body.imageUrl;
     }
 
     const updatedLawyer = await lawyerModel.findByIdAndUpdate(

@@ -41,13 +41,14 @@ export const forgotPassword = async (email) => {
   return api.post("/api/user/forgot-password", { email });
 };
 
+// signed Cloudinary params for the profile-picture direct upload
+export const getUserUploadSignature = async () => {
+  return api.post("/api/user/upload-signature");
+};
+
 // update profile
-export const updateUserProfile = async (formData) => {
-  return api.patch("/api/user/update-profile", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+export const updateUserProfile = async (payload) => {
+  return api.patch("/api/user/update-profile", payload);
 };
 
 // reset password

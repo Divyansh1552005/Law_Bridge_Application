@@ -3,7 +3,6 @@ import lawyerModel from "../models/lawyerModel.js";
 import dotenv from "dotenv/config";
 import appointmentModel from "../models/appointmentModel.js";
 import { verifyPassword, hashPasswordWithSalt } from "../utils/hash.js";
-import { v2 as cloudinary } from "cloudinary";
 import {
   addLawyerByAdminSchema,
   adminLoginSchema,
@@ -17,17 +16,31 @@ import {
 } from "../utils/token.js";
 import { refreshCookieOptions } from "../utils/cookies.js";
 import jwt from "jsonwebtoken";
+import { nanoid } from "nanoid";
+import { signUploadParams } from "../config/cloudinarySign.js";
+
+// Signed Cloudinary upload params for the new lawyer's profile picture
+// (lawyer doesn't exist yet, so the folder/public_id use a random id, not a lawyerId)
+export const getAdminLawyerUploadSignature = async (req, res) => {
+  try {
+    const signedParams = signUploadParams({
+      folder: "lawbridge/profile-images/lawyer-new",
+      public_id: `avatar-${nanoid(12)}`,
+      allowed_formats: "jpg,png",
+    });
+
+    return res
+      .status(200)
+      .json({ success: true, ...signedParams, resourceType: "image" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
 
 export const addlawyer = async (req, res) => {
   try {
-    const imageFile = req.file;
-    if (!imageFile) {
-      return res.status(400).json({
-        success: false,
-        message: "Image file is required",
-      });
-    }
-
     // Parse address if it's a string
     if (req.body.address && typeof req.body.address === "string") {
       try {
@@ -53,6 +66,7 @@ export const addlawyer = async (req, res) => {
       about,
       fees,
       address,
+      imageUrl,
     } = validatedData;
 
     // check if lawyer with the same email already exists
@@ -68,23 +82,6 @@ export const addlawyer = async (req, res) => {
     // hashing password
     const { salt, password: hashedPassword } =
       await hashPasswordWithSalt(password);
-
-    // Upload image to Cloudinary using buffer and upload_stream
-    const imageUrl = await new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          resource_type: "image",
-        },
-        (error, result) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(result.secure_url);
-          }
-        },
-      );
-      uploadStream.end(imageFile.buffer);
-    });
 
     // create new lawyer
     const newLawyer = new lawyerModel({

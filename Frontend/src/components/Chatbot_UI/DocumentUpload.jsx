@@ -182,7 +182,6 @@ const DocumentUpload = ({ onDocumentUploaded }) => {
       onDocumentUploaded({
         documentId: data.document._id,
         filename: data.document.filename,
-        cloudinaryUrl: data.document.cloudinaryUrl,
         fileType: data.document.fileType,
       });
     }
@@ -196,7 +195,6 @@ const DocumentUpload = ({ onDocumentUploaded }) => {
       onDocumentUploaded({
         documentId: doc._id,
         filename: doc.filename,
-        cloudinaryUrl: doc.cloudinaryUrl,
         fileType: doc.fileType,
       });
     }

@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { AppContext } from "../../context/AppContext";
 import api from "../../api/axiosClient";
 import Loader from "../../components/common/Loader";
+import { uploadToCloudinaryDirect } from "../../utils/directCloudinaryUpload";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png"];
 const MAX_SIZE_BYTES = 2 * 1024 * 1024; // 2MB
@@ -52,34 +53,38 @@ const AddLawyer = () => {
 
     try {
       setLoading(true);
-      const formData = new FormData();
-
-      formData.append("image", lawyerImg);
-      formData.append("name", name);
-      formData.append("email", email);
-      formData.append("password", password);
-      formData.append("experience", experience);
-      formData.append("fees", Number(fees));
-      formData.append("about", about);
-      formData.append("speciality", speciality);
-      formData.append("degree", degree);
-      formData.append(
-        "address",
-        JSON.stringify({
-          Location: location,
-          City: city,
-          State: state,
-        }),
-      );
 
       if (!adminData) {
         toast.error("Please login first");
         return;
       }
 
-      const { data } = await api.post("/api/admin/add-lawyer", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
+      const { data: signature } = await api.post(
+        "/api/admin/upload-signature",
+      );
+      if (!signature.success) {
+        toast.error(signature.message || "Could not start image upload");
+        return;
+      }
+      const cloudinaryResult = await uploadToCloudinaryDirect(
+        lawyerImg,
+        signature,
+      );
+
+      const { data } = await api.post("/api/admin/add-lawyer", {
+        imageUrl: cloudinaryResult.secure_url,
+        name,
+        email,
+        password,
+        experience,
+        fees: Number(fees),
+        about,
+        speciality,
+        degree,
+        address: {
+          Location: location,
+          City: city,
+          State: state,
         },
       });
 

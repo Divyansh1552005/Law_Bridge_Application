@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
 import useApp from "../context/useApp";
 import DeleteAccountModal from "./DeleteAccountModal";
-import { updateUserProfile, forgotPassword } from "../api/user.api";
+import {
+  updateUserProfile,
+  getUserUploadSignature,
+  forgotPassword,
+} from "../api/user.api";
 import { toast } from "react-toastify";
 import { setup2FA, verify2FA, disable2FA } from "../api/user.api";
 import { exportAllChats } from "../api/chat.api";
-import { getUserDocuments } from "../api/document.api";
+import { getUserDocuments, getDocumentSignedUrl } from "../api/document.api";
+import { uploadToCloudinaryDirect } from "../utils/directCloudinaryUpload";
 import { KeyRound, Shield, Trash2, Download, FileText, AlertTriangle } from "lucide-react";
 
 import Setup2FAModal from "../components/two_fa/Setup2FAModal";
@@ -88,22 +93,34 @@ const MyProfile = () => {
 
       setProfileUpdateLoading(true);
 
-      const formData = new FormData();
-      formData.append("name", userData.name);
-      formData.append("phone", userData.phone);
-      formData.append(
-        "address",
-        JSON.stringify({
+      let imageUrl;
+      if (image) {
+        const { data: signature } = await getUserUploadSignature();
+        if (!signature.success) {
+          toast.error(signature.message || "Could not start image upload");
+          return;
+        }
+        const cloudinaryResult = await uploadToCloudinaryDirect(
+          image,
+          signature,
+        );
+        imageUrl = cloudinaryResult.secure_url;
+      }
+
+      const payload = {
+        name: userData.name,
+        phone: userData.phone,
+        address: {
           Location: userData.address?.Location ?? "",
           City: userData.address?.City ?? "",
           State: userData.address?.State ?? "",
-        }),
-      );
-      formData.append("gender", userData.gender);
-      formData.append("dob", userData.dob);
-      image && formData.append("image", image);
+        },
+        gender: userData.gender,
+        dob: userData.dob,
+      };
+      if (imageUrl) payload.imageUrl = imageUrl;
 
-      const { data } = await updateUserProfile(formData);
+      const { data } = await updateUserProfile(payload);
 
       if (data.success) {
         toast.success(data.message);
@@ -117,6 +134,20 @@ const MyProfile = () => {
       toast.error("Profile update failed");
     } finally {
       setProfileUpdateLoading(false);
+    }
+  };
+
+  // documents are private on Cloudinary — fetch a fresh short-lived signed URL to view
+  const handleViewDocument = async (documentId) => {
+    try {
+      const { data } = await getDocumentSignedUrl(documentId);
+      if (data.success) {
+        window.open(data.url, "_blank", "noopener,noreferrer");
+      } else {
+        toast.error(data.message || "Could not open document");
+      }
+    } catch {
+      toast.error("Could not open document");
     }
   };
 
@@ -726,14 +757,13 @@ const MyProfile = () => {
                           </div>
                         </div>
 
-                        <a
-                          href={doc.cloudinaryUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
+                          type="button"
+                          onClick={() => handleViewDocument(doc._id)}
                           className="flex-shrink-0 w-full sm:w-auto text-center px-6 py-2.5 text-sm font-medium text-primary bg-white border-2 border-primary rounded-lg hover:bg-primary hover:text-white shadow-sm hover:shadow-md transition-all"
                         >
                           View Document
-                        </a>
+                        </button>
                       </div>
                     ))}
                   </div>

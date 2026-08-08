@@ -1,6 +1,5 @@
 import express from "express";
 import authLawyer from "../middleware/authLawyer.js";
-import { uploadImage } from "../middleware/multer.js";
 import { routeLimiter } from "../middleware/rateLimiter.js";
 import {
   changeAvailability,
@@ -10,6 +9,7 @@ import {
   appointmentCompletedByLawyer,
   getLawyerProfile,
   updateLawyerProfile,
+  getLawyerUploadSignature,
   lawyerDashboard,
   getLawyerAppointments,
   refreshLawyerAccessToken,
@@ -30,12 +30,8 @@ LawyerRouter.post(
   appointmentCompletedByLawyer,
 );
 LawyerRouter.get("/profile", authLawyer, getLawyerProfile);
-LawyerRouter.patch(
-  "/update-profile",
-  authLawyer,
-  uploadImage.single("image"),
-  updateLawyerProfile,
-);
+LawyerRouter.post("/upload-signature", authLawyer, getLawyerUploadSignature);
+LawyerRouter.patch("/update-profile", authLawyer, updateLawyerProfile);
 LawyerRouter.get("/dashboard", authLawyer, lawyerDashboard);
 LawyerRouter.get("/appointments", authLawyer, getLawyerAppointments);
 

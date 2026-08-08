@@ -11,11 +11,16 @@ import {
   refreshAdminAccessToken,
   logoutAdmin,
   changeAvailability,
+  getAdminLawyerUploadSignature,
 } from "../controllers/adminController.js";
-import { uploadImage } from "../middleware/multer.js";
 const AdminRouter = express.Router();
 
-AdminRouter.post("/add-lawyer", authAdmin, uploadImage.single("image"), addlawyer);
+AdminRouter.post(
+  "/upload-signature",
+  authAdmin,
+  getAdminLawyerUploadSignature,
+);
+AdminRouter.post("/add-lawyer", authAdmin, addlawyer);
 
 AdminRouter.post("/login", routeLimiter(5, 60), adminLogin);
 AdminRouter.post("/refresh", refreshAdminAccessToken);

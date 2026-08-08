@@ -37,6 +37,7 @@ import axios from "axios";
 import { encrypt, decrypt } from "../utils/encryption.js";
 import { generateOTP } from "../utils/generateOTP.js";
 import { v2 as cloudinary } from "cloudinary";
+import { signUploadParams } from "../config/cloudinarySign.js";
 import razorpay from "razorpay";
 import conversationModel from "../models/conversationModel.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/token.js";
@@ -626,6 +627,26 @@ export const resetPassword = async (req, res) => {
   }
 };
 
+// Signed Cloudinary upload params for the profile-picture direct upload
+export const getUserUploadSignature = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const signedParams = signUploadParams({
+      folder: `lawbridge/profile-images/user/${userId}`,
+      public_id: `avatar-${Date.now()}`,
+      allowed_formats: "jpg,png",
+    });
+
+    return res
+      .status(200)
+      .json({ success: true, ...signedParams, resourceType: "image" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
+};
+
 export const updateUserProfile = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -668,20 +689,9 @@ export const updateUserProfile = async (req, res) => {
       }
     }
 
-    // img upload handling
-    if (req.file) {
-      const imageUrl = await new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-          { resource_type: "image" },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result.secure_url);
-          },
-        );
-        uploadStream.end(req.file.buffer);
-      });
-
-      updates.image = imageUrl;
+    // img handling — client ne already Cloudinary pe seedha upload kar diya (presigned flow)
+    if (req.body.imageUrl) {
+      updates.image = req.body.imageUrl;
     }
 
     await userModel.findByIdAndUpdate(userId, updates, {
@@ -1607,6 +1617,7 @@ export const verifyDeleteAccountOtp = async (req, res) => {
           cloudinary.uploader
             .destroy(doc.cloudinaryPublicId, {
               resource_type: doc.fileType === "image" ? "image" : "raw",
+              type: "authenticated",
             })
             .catch((err) => console.error("Cloudinary cleanup error:", err)),
         ),

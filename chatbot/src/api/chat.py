@@ -5,7 +5,8 @@ import sys
 import traceback
 from pathlib import Path
 
-from fastapi import FastAPI, File, Form, Header, HTTPException, UploadFile
+import requests
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from langchain_core.prompts import PromptTemplate
@@ -96,6 +97,13 @@ class UploadResponse(BaseModel):
 
 class DeleteUserDataRequest(BaseModel):
     user_id: str
+
+
+class UploadDocumentRequest(BaseModel):
+    user_id: str
+    filename: str
+    signed_url: str
+    public_id: str
 
 
 # LLM aur retriever initialize karo
@@ -293,26 +301,25 @@ async def chat(
 
 @app.post("/upload-document", response_model=UploadResponse)
 async def upload_document(
-    file: UploadFile = File(...),
-    user_id: str = Form(...),
-    cloudinary_url: str = Form(...),
+    body: UploadDocumentRequest,
     secure_key: str = Header(None, alias="secure_key"),
 ):
-    # JS backend se already Cloudinary pe upload hui file aati hai
-    # sirf RAG pipeline chalti hai: extract -> chunk -> pinecone store
+    # JS backend se already Cloudinary pe (private/authenticated) upload hui file aati hai
+    # sirf RAG pipeline chalti hai: fetch via signed_url -> extract -> chunk -> pinecone store
     if secure_key != APP_SECRET_KEY:
         raise HTTPException(
             status_code=401, detail="Unauthorized: Invalid or missing key"
         )
 
     try:
-        file_bytes = await file.read()
+        response = requests.get(body.signed_url, timeout=30)
+        response.raise_for_status()
 
         result = process_uploaded_document(
-            file_bytes=file_bytes,
-            filename=file.filename,
-            user_id=user_id,
-            cloudinary_url=cloudinary_url,
+            file_bytes=response.content,
+            filename=body.filename,
+            user_id=body.user_id,
+            cloudinary_public_id=body.public_id,
         )
 
         return UploadResponse(**result)

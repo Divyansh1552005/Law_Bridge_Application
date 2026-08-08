@@ -3,9 +3,11 @@ import { getLawyersData as fetchLawyersAPI } from "../api/lawyer.api";
 import { getUserProfileData } from "../api/user.api";
 import { createChat, getChatBySession } from "../api/chat.api";
 import {
-  uploadDocument as uploadDocumentAPI,
+  getUploadSignature,
+  confirmUpload,
   getUserDocuments,
 } from "../api/document.api";
+import { uploadToCloudinaryDirect } from "../utils/directCloudinaryUpload";
 
 export const appActions = ({
   setLawyers,
@@ -99,9 +101,25 @@ export const appActions = ({
   uploadDocument: async (file) => {
     try {
       setUploadingDocument(true);
-      const formData = new FormData();
-      formData.append("file", file);
-      const { data } = await uploadDocumentAPI(formData);
+
+      const { data: signature } = await getUploadSignature(file);
+      if (!signature.success) {
+        toast.error(signature.message || "Document upload failed");
+        return null;
+      }
+
+      const cloudinaryResult = await uploadToCloudinaryDirect(
+        file,
+        signature,
+      );
+
+      const { data } = await confirmUpload({
+        publicId: cloudinaryResult.public_id,
+        resourceType: signature.resourceType,
+        filename: file.name,
+        fileType: signature.fileType,
+      });
+
       if (data.success) {
         setUserDocuments((prev) => [data.document, ...prev]);
         setUploadsRemaining(data.uploadsRemaining);

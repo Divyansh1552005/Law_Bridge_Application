@@ -12,10 +12,6 @@ const attachedDocumentSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    cloudinaryUrl: {
-      type: String,
-      required: true,
-    },
     fileType: {
       type: String,
       enum: ["pdf", "docx", "txt", "image"],

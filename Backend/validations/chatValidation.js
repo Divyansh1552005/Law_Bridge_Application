@@ -20,7 +20,6 @@ export const getMessageSchema = z.object({
     .object({
       documentId: z.string(),
       filename: z.string(),
-      cloudinaryUrl: z.string(),
       fileType: z.string(),
     })
     .nullable()

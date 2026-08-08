@@ -597,15 +597,62 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /user/upload-signature:
+    post:
+      summary: Get signed Cloudinary upload params for the profile picture
+      description: >
+        Returns signed Cloudinary params for a direct browser-to-Cloudinary
+        upload (public delivery — avatars are meant to be publicly viewable).
+        Call this before /user/update-profile when changing the profile image.
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Signed upload params issued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  timestamp:
+                    type: integer
+                  signature:
+                    type: string
+                  apiKey:
+                    type: string
+                  cloudName:
+                    type: string
+                  folder:
+                    type: string
+                  public_id:
+                    type: string
+                  resourceType:
+                    type: string
+                    example: "image"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /user/update-profile:
     patch:
       summary: Update authenticated user's profile
+      description: >
+        Profile image is no longer uploaded through this endpoint. Get
+        /user/upload-signature, upload the file straight to Cloudinary from
+        the browser, then pass the returned secure_url as imageUrl here.
       tags: [Users]
       security:
         - bearerAuth: []
       requestBody:
         content:
-          multipart/form-data:
+          application/json:
             schema:
               type: object
               properties:
@@ -614,15 +661,22 @@ paths:
                 phone:
                   type: string
                 address:
-                  type: string
-                  description: JSON string with Location, City, State
+                  type: object
+                  properties:
+                    Location:
+                      type: string
+                    City:
+                      type: string
+                    State:
+                      type: string
                 dob:
                   type: string
                 gender:
                   type: string
-                image:
+                imageUrl:
                   type: string
-                  format: binary
+                  format: uri
+                  description: secure_url returned by the direct Cloudinary upload
       responses:
         "200":
           description: Profile updated successfully
@@ -1324,9 +1378,56 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /lawyer/upload-signature:
+    post:
+      summary: Get signed Cloudinary upload params for the profile picture
+      description: >
+        Returns signed Cloudinary params for a direct browser-to-Cloudinary
+        upload. Call this before /lawyer/update-profile when changing the
+        profile image.
+      tags: [Lawyers]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Signed upload params issued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  timestamp:
+                    type: integer
+                  signature:
+                    type: string
+                  apiKey:
+                    type: string
+                  cloudName:
+                    type: string
+                  folder:
+                    type: string
+                  public_id:
+                    type: string
+                  resourceType:
+                    type: string
+                    example: "image"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /lawyer/update-profile:
     patch:
       summary: Update authenticated lawyer's profile
+      description: >
+        Profile image is no longer uploaded through this endpoint. Get
+        /lawyer/upload-signature, upload the file straight to Cloudinary
+        from the browser, then pass the returned secure_url as imageUrl here.
       tags: [Lawyers]
       security:
         - bearerAuth: []
@@ -1351,6 +1452,10 @@ paths:
                       type: string
                     State:
                       type: string
+                imageUrl:
+                  type: string
+                  format: uri
+                  description: secure_url returned by the direct Cloudinary upload
       responses:
         "200":
           description: Profile updated successfully
@@ -1743,19 +1848,67 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /admin/upload-signature:
+    post:
+      summary: Get signed Cloudinary upload params for a new lawyer's profile picture
+      description: >
+        Returns signed Cloudinary params for a direct browser-to-Cloudinary
+        upload. Since the lawyer doesn't exist yet at this point, the
+        folder/public_id use a random id rather than a lawyerId. Call this
+        before /admin/add-lawyer.
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Signed upload params issued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  timestamp:
+                    type: integer
+                  signature:
+                    type: string
+                  apiKey:
+                    type: string
+                  cloudName:
+                    type: string
+                  folder:
+                    type: string
+                  public_id:
+                    type: string
+                  resourceType:
+                    type: string
+                    example: "image"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /admin/add-lawyer:
     post:
       summary: Add a new lawyer (admin only)
+      description: >
+        Image is no longer uploaded through this endpoint. Get
+        /admin/upload-signature, upload the file straight to Cloudinary from
+        the browser, then pass the returned secure_url as imageUrl here.
       tags: [Admin]
       security:
         - bearerAuth: []
       requestBody:
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
               type: object
-              required: [name, email, password, speciality, degree, experience, about, fees, address, image]
+              required: [name, email, password, speciality, degree, experience, about, fees, address, imageUrl]
               properties:
                 name:
                   type: string
@@ -1778,12 +1931,18 @@ paths:
                 fees:
                   type: number
                 address:
+                  type: object
+                  properties:
+                    Location:
+                      type: string
+                    City:
+                      type: string
+                    State:
+                      type: string
+                imageUrl:
                   type: string
-                  description: JSON string with Location, City, State
-                  example: '{"Location":"123 Main St","City":"Mumbai","State":"Maharashtra"}'
-                image:
-                  type: string
-                  format: binary
+                  format: uri
+                  description: secure_url returned by the direct Cloudinary upload
       responses:
         "201":
           description: Lawyer added successfully
@@ -2305,32 +2464,43 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 
   # ─── Documents ───────────────────────────────────────────────────────────────
+  # Uploads go straight from the browser to Cloudinary using a backend-issued
+  # signed upload — the file bytes never pass through this API. Documents are
+  # stored as Cloudinary "authenticated" (private) assets; reading one back
+  # (for the chatbot ingestion pipeline, or the "View Document" UI) always
+  # goes through a freshly generated short-lived signed URL, never a stored
+  # public URL.
 
-  /document/upload:
+  /documents/upload-signature:
     post:
-      summary: Upload a legal document for AI analysis
+      summary: Get signed Cloudinary upload params for a document
       description: >
-        Upload PDF, DOCX, TXT, or image files for AI-powered legal document analysis.
-        Documents are stored in user-specific Pinecone namespaces for hybrid RAG queries.
-        Maximum file size: 10MB. Rate limited to 10 uploads per hour.
+        Step 1 of the upload flow. Validates mimetype/size and the daily
+        upload limit (2/day), then returns signed Cloudinary params
+        (timestamp, signature, folder, public_id, type=authenticated) that
+        the client uses to upload the file directly to Cloudinary.
       tags: [Documents]
       security:
         - bearerAuth: []
       requestBody:
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
               type: object
-              required: [file]
+              required: [filename, mimetype, size]
               properties:
-                file:
+                filename:
                   type: string
-                  format: binary
-                  description: Legal document file (PDF, DOCX, TXT, PNG, JPG, JPEG)
+                mimetype:
+                  type: string
+                  example: "application/pdf"
+                size:
+                  type: integer
+                  description: File size in bytes
       responses:
-        "201":
-          description: Document uploaded and processed successfully
+        "200":
+          description: Signed upload params issued
           content:
             application/json:
               schema:
@@ -2339,25 +2509,29 @@ paths:
                   success:
                     type: boolean
                     example: true
-                  message:
+                  timestamp:
+                    type: integer
+                  signature:
                     type: string
-                    example: "Document uploaded successfully"
-                  document:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                      filename:
-                        type: string
-                      fileType:
-                        type: string
-                      fileSize:
-                        type: integer
-                      uploadedAt:
-                        type: string
-                        format: date-time
+                  apiKey:
+                    type: string
+                  cloudName:
+                    type: string
+                  folder:
+                    type: string
+                  public_id:
+                    type: string
+                  type:
+                    type: string
+                    example: "authenticated"
+                  resourceType:
+                    type: string
+                    example: "raw"
+                  fileType:
+                    type: string
+                    example: "pdf"
         "400":
-          description: Invalid file type or size exceeds limit
+          description: Unsupported file type or size exceeds the per-type limit
           content:
             application/json:
               schema:
@@ -2369,19 +2543,100 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         "429":
-          description: Rate limit exceeded (10 uploads per hour)
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        "500":
-          description: Server error during upload or processing
+          description: Daily upload limit reached (2 uploads/day)
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /document:
+  /documents/confirm-upload:
+    post:
+      summary: Confirm a direct Cloudinary upload and run the RAG ingestion pipeline
+      description: >
+        Step 2 of the upload flow, called after the client has uploaded the
+        file straight to Cloudinary using the signed params from
+        /documents/upload-signature. The backend verifies the asset actually
+        exists and belongs to this user, generates a short-lived signed URL,
+        and hands that URL to the Python chatbot service for text extraction
+        and embedding (the chatbot fetches the bytes itself; they are never
+        re-uploaded through this API).
+      tags: [Documents]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [publicId, resourceType, filename, fileType]
+              properties:
+                publicId:
+                  type: string
+                resourceType:
+                  type: string
+                  example: "raw"
+                filename:
+                  type: string
+                fileType:
+                  type: string
+                  example: "pdf"
+      responses:
+        "201":
+          description: Document processed and saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Document uploaded and processed successfully"
+                  document:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                      filename:
+                        type: string
+                      fileType:
+                        type: string
+                      chunksStored:
+                        type: number
+                      createdAt:
+                        type: string
+                        format: date-time
+                  uploadsRemaining:
+                    type: integer
+        "400":
+          description: Invalid publicId, or the uploaded asset could not be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "429":
+          description: Daily upload limit reached (2 uploads/day)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: RAG ingestion failed (the Cloudinary asset is deleted automatically on this path)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /documents:
     get:
       summary: Get all uploaded documents for the authenticated user
       description: Returns a list of all documents uploaded by the user with metadata
@@ -2404,19 +2659,74 @@ paths:
                     items:
                       type: object
                       properties:
-                        id:
+                        _id:
                           type: string
                         filename:
                           type: string
                         fileType:
                           type: string
-                        fileSize:
-                          type: integer
-                        uploadedAt:
+                        chunksStored:
+                          type: number
+                        createdAt:
                           type: string
                           format: date-time
+                  uploadsToday:
+                    type: integer
+                  uploadsRemaining:
+                    type: integer
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /documents/{id}/signed-url:
+    get:
+      summary: Get a fresh signed URL to view/download a private document
+      description: >
+        Documents are stored as private ("authenticated") Cloudinary assets
+        with no usable permanent public URL. This returns a short-lived
+        (5 minute) signed URL, generated on demand, for the "View Document"
+        UI and the chat attachment link. Ownership is checked before the
+        URL is generated.
+      tags: [Documents]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Signed URL issued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  url:
+                    type: string
+                    format: uri
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "404":
+          description: Document not found or not owned by this user
           content:
             application/json:
               schema:

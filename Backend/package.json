@@ -35,7 +35,6 @@
     "mongoose": "^8.24.2",
     "multer": "^2.2.0",
     "nanoid": "^5.1.16",
-    "nodemailer": "^7.0.13",
     "otpauth": "^9.5.1",
     "pdfkit": "^0.18.0",
     "qrcode": "^1.5.4",

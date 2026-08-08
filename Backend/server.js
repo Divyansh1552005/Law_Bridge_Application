@@ -17,6 +17,7 @@ import cookieParser from "cookie-parser";
 import { rateLimiter } from "./middleware/rateLimiter.js";
 import { setupSwagger } from "./config/swagger.js";
 import "./bullmq/workers/videoWorker.js";
+import "./bullmq/workers/emailWorker.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;

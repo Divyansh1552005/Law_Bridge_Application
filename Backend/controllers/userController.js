@@ -21,7 +21,7 @@ import appointmentModel from "../models/appointmentModel.js";
 import documentModel from "../models/documentModel.js";
 import crypto from "crypto";
 import { generateCryptoToken } from "../utils/cryptoToken.js";
-import { sendEmail } from "../services/mailService.js";
+import { queueEmail } from "../bullmq/jobs/emailJobs.js";
 import {
   verifyEmailTemplate,
   resetPasswordTemplate,
@@ -92,7 +92,7 @@ export const signupUser = async (req, res) => {
     // send verification email
     const verifyLink = `${process.env.FRONTEND_URL}/verify-email/${rawToken}`;
 
-    await sendEmail({
+    await queueEmail({
       to: email,
       subject: "Verify your email",
       html: verifyEmailTemplate(verifyLink),
@@ -420,7 +420,7 @@ export const resendVerificationEmail = async (req, res) => {
 
     const verifyLink = `${process.env.FRONTEND_URL}/verify-email/${rawToken}`;
 
-    await sendEmail({
+    await queueEmail({
       to: email,
       subject: "Verify your email",
       html: verifyEmailTemplate(verifyLink),
@@ -551,7 +551,7 @@ export const forgotPassword = async (req, res) => {
 
     const resetLink = `${process.env.FRONTEND_URL}/reset-password/${rawToken}`;
 
-    await sendEmail({
+    await queueEmail({
       to: email,
       subject: "Reset your password",
       html: resetPasswordTemplate(resetLink),
@@ -1541,7 +1541,7 @@ export const requestDeleteAccountOtp = async (req, res) => {
 
     await user.save({ validateBeforeSave: false });
 
-    await sendEmail({
+    await queueEmail({
       to: user.email,
       subject: "Confirm Account Deletion",
       html: deleteAccountOtpTemplate(otp),
@@ -2022,7 +2022,7 @@ export const requestMagicLink = async (req, res) => {
 
     const magicLink = `${process.env.FRONTEND_URL}/verify-magic-link/${rawToken}`;
 
-    await sendEmail({
+    await queueEmail({
       to: email,
       subject: "Your Magic Login Link - LawBridge",
       html: magicLinkTemplate(magicLink),

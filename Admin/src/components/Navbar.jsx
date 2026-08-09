@@ -33,7 +33,10 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
         toast.success("Lawyer logged out successfully");
       }
 
-      setTimeout(() => navigate("/login"), 1000);
+      setTimeout(() => {
+        navigate("/login");
+        setLoggingOut(false);
+      }, 1000);
     } catch (error) {
       // console.error("Logout error:", error);
       toast.error("Logout failed");
@@ -43,7 +46,10 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
       clearLawyerAuth();
       setAdminData(null);
       setLawyerData(null);
-      setTimeout(() => navigate("/login"), 1000);
+      setTimeout(() => {
+        navigate("/login");
+        setLoggingOut(false);
+      }, 1000);
     }
   };
 

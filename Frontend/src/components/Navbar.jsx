@@ -88,6 +88,7 @@ const Navbar = () => {
     setTimeout(() => {
       setUserData(null);
       navigate("/");
+      setLoggingOut(false);
     }, 1500);
   };
 

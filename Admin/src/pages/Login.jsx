@@ -9,6 +9,7 @@ import {
   setLawyerAccessToken,
 } from "../context/auth.tokens";
 import TurnstileWidget from "../components/common/TurnstileWidget";
+import AuthTransitionOverlay from "../components/common/AuthTransitionOverlay";
 
 const Login = () => {
   const [state, setState] = useState("Admin");
@@ -22,6 +23,7 @@ const Login = () => {
 
   const turnstileRef = useRef(null);
   const [turnstileToken, setTurnstileToken] = useState("");
+  const [signingIn, setSigningIn] = useState(false);
 
   const navigate = useNavigate();
 
@@ -89,7 +91,9 @@ const Login = () => {
           setAdminData(data.admin);
 
           toast.success("Login successful!");
-          navigate("/admin-dashboard");
+          setSigningIn(true);
+          setTimeout(() => navigate("/admin-dashboard"), 1200);
+          return;
         } else {
           toast.error(data.message || "Invalid credentials, please try again.");
         }
@@ -132,7 +136,9 @@ const Login = () => {
           setLawyerData(data.lawyer);
 
           toast.success("Lawyer login successful!");
-          navigate("/lawyer-dashboard");
+          setSigningIn(true);
+          setTimeout(() => navigate("/lawyer-dashboard"), 1200);
+          return;
         } else {
           toast.error(data.message || "Login failed");
         }
@@ -166,7 +172,9 @@ const Login = () => {
   }
 
   return (
-    <form onSubmit={onSubmitHandler} className="min-h-[80vh] flex items-center">
+    <>
+      {signingIn && <AuthTransitionOverlay message="Signing you in..." />}
+      <form onSubmit={onSubmitHandler} className="min-h-[80vh] flex items-center">
       <div className="flex flex-col gap-3 m-auto items-start p-8 min-w-[340px] sm:min-w-96 border rounded-xl text-[#5E5E5E] text-sm shadow-lg">
         <p className="text-2xl font-semibold m-auto">
           <span className="text-primary">{state}</span> Login
@@ -271,7 +279,8 @@ const Login = () => {
           </p>
         )}
       </div>
-    </form>
+      </form>
+    </>
   );
 };
 

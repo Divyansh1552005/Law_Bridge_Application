@@ -12,6 +12,7 @@ import {
 } from "../api/user.api.js";
 import { setAccessToken } from "../context/auth.tokens.js";
 import TurnstileWidget from "../components/common/TurnstileWidget.jsx";
+import AuthTransitionOverlay from "../components/common/AuthTransitionOverlay.jsx";
 
 const Login = () => {
   const [state, setState] = useState("Sign Up");
@@ -52,6 +53,7 @@ const Login = () => {
 
   const turnstileRef = useRef(null);
   const [turnstileToken, setTurnstileToken] = useState("");
+  const [signingIn, setSigningIn] = useState(false);
 
   const navigate = useNavigate();
   const { setUserData } = useApp();
@@ -170,7 +172,9 @@ const Login = () => {
         setAccessToken(data.accessToken);
         setUserData(data.user);
         toast.success("Login successful!");
-        navigate("/");
+        setSigningIn(true);
+        setTimeout(() => navigate("/"), 1200);
+        return;
       } else {
         toast.error(data.message || "Login failed");
       }
@@ -294,7 +298,9 @@ const Login = () => {
   };
 
   return (
-    <form onSubmit={onSubmitHandler} className="min-h-[80vh] flex items-center">
+    <>
+      {signingIn && <AuthTransitionOverlay message="Signing you in..." />}
+      <form onSubmit={onSubmitHandler} className="min-h-[80vh] flex items-center">
       <div className="flex flex-col gap-3 m-auto items-start p-8 min-w-[340px] sm:min-w-96 border rounded-xl text-[#5E5E5E] text-sm shadow-lg">
         <p className="text-2xl font-semibold">
           {state === "Sign Up"
@@ -624,7 +630,8 @@ const Login = () => {
           </>
         )}
       </div>
-    </form>
+      </form>
+    </>
   );
 };
 

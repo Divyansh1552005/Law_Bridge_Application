@@ -3,6 +3,7 @@ import { assets } from "../assets/assets";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import useApp from "../context/useApp";
 import api from "../api/axiosClient";
+import AuthTransitionOverlay from "./common/AuthTransitionOverlay.jsx";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const Navbar = () => {
   const [showMobileDropdown, setShowMobileDropdown] = useState(false);
   const [activeLink, setActiveLink] = useState("/");
   const [dropletStyle, setDropletStyle] = useState({});
+  const [loggingOut, setLoggingOut] = useState(false);
   const navRef = useRef(null);
   const { userData, setUserData } = useApp();
 
@@ -74,6 +76,8 @@ const Navbar = () => {
   }, []);
 
   const logout = async () => {
+    setLoggingOut(true);
+
     try {
       await api.post("/api/auth/logout");
     } catch {
@@ -89,6 +93,7 @@ const Navbar = () => {
 
   return (
     <div className="relative mb-5 flex w-full min-w-0 items-center justify-between border-b border-b-[#ADADAD] py-4 text-sm">
+      {loggingOut && <AuthTransitionOverlay message="Logging you out..." />}
       <img
         onClick={() => navigate("/")}
         className="h-12 w-auto shrink-0 cursor-pointer sm:h-14 md:h-16"

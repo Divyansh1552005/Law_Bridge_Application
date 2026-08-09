@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { assets } from "../assets/assets";
 import { AppContext } from "../context/AppContext";
 import { useNavigate } from "react-router-dom";
@@ -6,14 +6,18 @@ import api from "../api/axiosClient";
 import { clearAdminAuth, clearLawyerAuth } from "../context/auth.tokens";
 import { toast } from "react-toastify";
 import { Menu } from "lucide-react";
+import AuthTransitionOverlay from "./common/AuthTransitionOverlay";
 
 const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const { adminData, setAdminData, lawyerData, setLawyerData } =
     useContext(AppContext);
 
   const navigate = useNavigate();
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const logout = async () => {
+    setLoggingOut(true);
+
     try {
       if (adminData) {
         // Admin logout
@@ -29,7 +33,7 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
         toast.success("Lawyer logged out successfully");
       }
 
-      navigate("/login");
+      setTimeout(() => navigate("/login"), 1000);
     } catch (error) {
       // console.error("Logout error:", error);
       toast.error("Logout failed");
@@ -39,12 +43,13 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
       clearLawyerAuth();
       setAdminData(null);
       setLawyerData(null);
-      navigate("/login");
+      setTimeout(() => navigate("/login"), 1000);
     }
   };
 
   return (
     <div className="flex justify-between items-center px-4 sm:px-10 py-3 sm:py-4 border-b border-gray-100 bg-white shadow-sm transition-all">
+      {loggingOut && <AuthTransitionOverlay message="Logging you out..." />}
       <div className="flex items-center gap-2 sm:gap-3">
         <button
           onClick={() => setIsSidebarOpen && setIsSidebarOpen(!isSidebarOpen)}

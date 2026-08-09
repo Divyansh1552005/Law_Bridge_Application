@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useRef, useState, useEffect } from "react";
 import Loader from "../components/common/Loader";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
@@ -8,6 +8,7 @@ import {
   setAdminAccessToken,
   setLawyerAccessToken,
 } from "../context/auth.tokens";
+import TurnstileWidget from "../components/common/TurnstileWidget";
 
 const Login = () => {
   const [state, setState] = useState("Admin");
@@ -18,6 +19,9 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [rateLimited, setRateLimited] = useState(false);
   const [cooldownSecs, setCooldownSecs] = useState(0);
+
+  const turnstileRef = useRef(null);
+  const [turnstileToken, setTurnstileToken] = useState("");
 
   const navigate = useNavigate();
 
@@ -62,6 +66,11 @@ const Login = () => {
 
     if (rateLimited) return;
 
+    if (!turnstileToken) {
+      toast.error("Please complete the verification challenge first.");
+      return;
+    }
+
     setLoading(true);
 
     if (state === "Admin") {
@@ -69,6 +78,7 @@ const Login = () => {
         const { data } = await api.post("/api/admin/login", {
           email,
           password,
+          turnstileToken,
         });
 
         if (data.success) {
@@ -103,6 +113,7 @@ const Login = () => {
         }
       } finally {
         setLoading(false);
+        turnstileRef.current?.reset();
       }
     } else {
       // Lawyer Login Logic
@@ -110,6 +121,7 @@ const Login = () => {
         const { data } = await api.post("/api/lawyer/login", {
           email,
           password,
+          turnstileToken,
         });
 
         if (data.success) {
@@ -144,6 +156,7 @@ const Login = () => {
         }
       } finally {
         setLoading(false);
+        turnstileRef.current?.reset();
       }
     }
   };
@@ -221,8 +234,13 @@ const Login = () => {
             </button>
           </div>
         </div>
+        <TurnstileWidget
+          ref={turnstileRef}
+          onToken={setTurnstileToken}
+          className="w-full"
+        />
         <button
-          disabled={loading || rateLimited}
+          disabled={loading || rateLimited || !turnstileToken}
           className="bg-primary text-white w-full py-2 rounded-md text-base disabled:opacity-60"
         >
           {rateLimited

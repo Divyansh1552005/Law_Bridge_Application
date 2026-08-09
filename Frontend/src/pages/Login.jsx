@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import useApp from "../context/useApp.jsx";
 import { toast } from "react-toastify";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -11,6 +11,7 @@ import {
   requestMagicLink
 } from "../api/user.api.js";
 import { setAccessToken } from "../context/auth.tokens.js";
+import TurnstileWidget from "../components/common/TurnstileWidget.jsx";
 
 const Login = () => {
   const [state, setState] = useState("Sign Up");
@@ -48,6 +49,9 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rateLimited, setRateLimited] = useState(false);
   const [cooldownSecs, setCooldownSecs] = useState(0);
+
+  const turnstileRef = useRef(null);
+  const [turnstileToken, setTurnstileToken] = useState("");
 
   const navigate = useNavigate();
   const { setUserData } = useApp();
@@ -92,6 +96,11 @@ const Login = () => {
 
     if (rateLimited) return;
 
+    if (!turnstileToken) {
+      toast.error("Please complete the verification challenge first.");
+      return;
+    }
+
     setLoading(true);
     setShowResend(false);
     setShowForgot(false);
@@ -105,7 +114,7 @@ const Login = () => {
       }
 
       try {
-        const { data } = await signupUser(name, email, password);
+        const { data } = await signupUser(name, email, password, turnstileToken);
 
         if (data.success) {
           toast.success("Signup successful! Please verify your email.");
@@ -129,6 +138,7 @@ const Login = () => {
         }
       } finally {
         setLoading(false);
+        turnstileRef.current?.reset();
       }
 
       return;
@@ -144,13 +154,14 @@ const Login = () => {
           }
         : { email, password };
 
-      const { data } = await loginUser(payload);
+      const { data } = await loginUser(payload, turnstileToken);
 
       // 2FA required
       if (data.requires2FA) {
         setRequires2FA(true);
         setPendingLogin({ email, password });
         setLoading(false);
+        turnstileRef.current?.reset();
         return;
       }
 
@@ -180,6 +191,7 @@ const Login = () => {
       }
     } finally {
       setLoading(false);
+      turnstileRef.current?.reset();
     }
   };
 
@@ -222,10 +234,15 @@ const Login = () => {
 
     if (rateLimited) return;
 
+    if (!turnstileToken) {
+      toast.error("Please complete the verification challenge first.");
+      return;
+    }
+
     setForgotLoading(true);
 
     try {
-      const { data } = await forgotPassword(email);
+      const { data } = await forgotPassword(email, turnstileToken);
 
       toast.success(data.message || "Password reset email sent!");
       setShowForgot(false);
@@ -240,20 +257,26 @@ const Login = () => {
       }
     } finally {
       setForgotLoading(false);
+      turnstileRef.current?.reset();
     }
   };
-  
-  
+
+
   // magic link
   const handleMagicLink = async () => {
     if (!magicLinkEmail) {
       toast.error("Please enter your email");
       return;
     }
-  
+
+    if (!turnstileToken) {
+      toast.error("Please complete the verification challenge first.");
+      return;
+    }
+
     setMagicLinkLoading(true);
     try {
-      const { data } = await requestMagicLink(magicLinkEmail);
+      const { data } = await requestMagicLink(magicLinkEmail, turnstileToken);
       if (data.success) {
         setMagicLinkSent(true);
         toast.success("Magic link sent! Check your email.");
@@ -266,6 +289,7 @@ const Login = () => {
       }
     } finally {
       setMagicLinkLoading(false);
+      turnstileRef.current?.reset();
     }
   };
 
@@ -407,10 +431,18 @@ const Login = () => {
           </div>
         )}
 
+        {/* TURNSTILE VERIFICATION */}
+        <TurnstileWidget
+          ref={turnstileRef}
+          onToken={setTurnstileToken}
+          className="w-full"
+        />
+
         <button
           disabled={
             loading ||
             rateLimited ||
+            !turnstileToken ||
             (state === "Sign Up" && !passwordValid) ||
             (requires2FA && !twoFactorCode)
           }
@@ -486,7 +518,7 @@ const Login = () => {
             <button
               type="button"
               onClick={handleForgotPassword}
-              disabled={forgotLoading || rateLimited}
+              disabled={forgotLoading || rateLimited || !turnstileToken}
               className="mt-2 bg-primary text-white px-4 py-1 rounded-md disabled:opacity-60"
             >
               {rateLimited
@@ -534,7 +566,7 @@ const Login = () => {
                     <button
                       type="button"
                       onClick={handleMagicLink}
-                      disabled={magicLinkLoading || rateLimited}
+                      disabled={magicLinkLoading || rateLimited || !turnstileToken}
                       className="bg-primary text-white w-full py-2 rounded-md text-sm disabled:opacity-60"
                     >
                       {rateLimited

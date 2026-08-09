@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { resetPassword } from "../api/user.api";
 import { toast } from "react-toastify";
+import TurnstileWidget from "../components/common/TurnstileWidget.jsx";
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -10,6 +11,9 @@ const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const turnstileRef = useRef(null);
+  const [turnstileToken, setTurnstileToken] = useState("");
 
   // Password strength checks — same rules as signup
   const hasUpper = /[A-Z]/.test(password);
@@ -33,10 +37,15 @@ const ResetPassword = () => {
       return;
     }
 
+    if (!turnstileToken) {
+      toast.error("Please complete the verification challenge first.");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const { data } = await resetPassword(token, password);
+      const { data } = await resetPassword(token, password, turnstileToken);
 
       toast.success(data.message || "Password reset successful");
 
@@ -50,6 +59,7 @@ const ResetPassword = () => {
       );
     } finally {
       setLoading(false);
+      turnstileRef.current?.reset();
     }
   };
 
@@ -104,8 +114,19 @@ const ResetPassword = () => {
           />
         </div>
 
+        <TurnstileWidget
+          ref={turnstileRef}
+          onToken={setTurnstileToken}
+          className="w-full"
+        />
+
         <button
-          disabled={loading || !passwordValid || password !== confirmPassword}
+          disabled={
+            loading ||
+            !passwordValid ||
+            password !== confirmPassword ||
+            !turnstileToken
+          }
           className="bg-primary text-white w-full py-2 my-2 rounded-md text-base disabled:opacity-60"
         >
           {loading ? "Resetting..." : "Reset Password"}

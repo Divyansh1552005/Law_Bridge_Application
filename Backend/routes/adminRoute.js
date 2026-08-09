@@ -1,6 +1,7 @@
 import express from "express";
 import authAdmin from "../middleware/authAdmin.js";
 import { routeLimiter } from "../middleware/rateLimiter.js";
+import { verifyTurnstile } from "../middleware/verifyTurnstile.js";
 import {
   addlawyer,
   adminLogin,
@@ -22,7 +23,7 @@ AdminRouter.post(
 );
 AdminRouter.post("/add-lawyer", authAdmin, addlawyer);
 
-AdminRouter.post("/login", routeLimiter(5, 60), adminLogin);
+AdminRouter.post("/login", routeLimiter(5, 60), verifyTurnstile, adminLogin);
 AdminRouter.post("/refresh", refreshAdminAccessToken);
 AdminRouter.post("/logout", logoutAdmin);
 AdminRouter.get("/all-lawyers", authAdmin, getAllLawyers);

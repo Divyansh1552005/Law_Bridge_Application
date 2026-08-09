@@ -16,8 +16,8 @@ export const verifyDeleteAccount = async (otp) => {
 };
 
 // signup
-export const signupUser = async (name, email, password) => {
-  return api.post("/api/user/signup", { name, email, password });
+export const signupUser = async (name, email, password, turnstileToken) => {
+  return api.post("/api/user/signup", { name, email, password, turnstileToken });
 };
 
 // google login
@@ -27,8 +27,8 @@ export const loginWithGoogle = () => {
 };
 
 // login
-export const loginUser = async (payload) => {
-  return api.post("/api/user/login", payload);
+export const loginUser = async (payload, turnstileToken) => {
+  return api.post("/api/user/login", { ...payload, turnstileToken });
 };
 
 // resend verification email
@@ -37,8 +37,8 @@ export const resendVerification = async (email) => {
 };
 
 // forgot password
-export const forgotPassword = async (email) => {
-  return api.post("/api/user/forgot-password", { email });
+export const forgotPassword = async (email, turnstileToken) => {
+  return api.post("/api/user/forgot-password", { email, turnstileToken });
 };
 
 // signed Cloudinary params for the profile-picture direct upload
@@ -52,8 +52,11 @@ export const updateUserProfile = async (payload) => {
 };
 
 // reset password
-export const resetPassword = async (resetToken, password) => {
-  return api.post(`/api/user/reset-password/${resetToken}`, { password });
+export const resetPassword = async (resetToken, password, turnstileToken) => {
+  return api.post(`/api/user/reset-password/${resetToken}`, {
+    password,
+    turnstileToken,
+  });
 };
 
 // verify email
@@ -76,8 +79,8 @@ export const disable2FA = (payload) => {
 };
 
 // Magic link for login
-export const requestMagicLink = async (email) => {
-  return api.post("/api/user/magic-link", { email });
+export const requestMagicLink = async (email, turnstileToken) => {
+  return api.post("/api/user/magic-link", { email, turnstileToken });
 };
 
 export const verifyMagicLink = async (token) => {

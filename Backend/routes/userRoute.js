@@ -24,6 +24,7 @@ import {
   verifyMagicLink2FA,
 } from "../controllers/userController.js";
 import { rateLimiter, routeLimiter } from "../middleware/rateLimiter.js";
+import { verifyTurnstile } from "../middleware/verifyTurnstile.js";
 import {
   startGoogleAuth,
   googleCallback,
@@ -32,15 +33,21 @@ import {
 const userRouter = express.Router();
 
 // signup and login routes
-userRouter.post("/signup", routeLimiter(3, 60), signupUser);
-userRouter.post("/login", routeLimiter(5, 60), loginUser);
+userRouter.post("/signup", routeLimiter(3, 60), verifyTurnstile, signupUser);
+userRouter.post("/login", routeLimiter(5, 60), verifyTurnstile, loginUser);
 userRouter.get("/verify-email/:token", verifyEmail);
 
 // forgot password routes
-userRouter.post("/forgot-password", routeLimiter(3, 60 * 60), forgotPassword);
+userRouter.post(
+  "/forgot-password",
+  routeLimiter(3, 60 * 60),
+  verifyTurnstile,
+  forgotPassword,
+);
 userRouter.post(
   "/reset-password/:token",
   routeLimiter(5, 60 * 15),
+  verifyTurnstile,
   resetPassword,
 );
 
@@ -89,7 +96,12 @@ userRouter.post("/2fa/verify", authUser, verify2FA);
 userRouter.post("/2fa/disable", authUser, disable2FA);
 
 // Magic link for login
-userRouter.post("/magic-link", routeLimiter(3, 60 * 60), requestMagicLink);
+userRouter.post(
+  "/magic-link",
+  routeLimiter(3, 60 * 60),
+  verifyTurnstile,
+  requestMagicLink,
+);
 userRouter.get("/verify-magic-link/:token", verifyMagicLink);
 userRouter.post(
   "/verify-magic-link/:token",

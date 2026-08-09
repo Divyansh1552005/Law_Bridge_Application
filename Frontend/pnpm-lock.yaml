@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@marsidev/react-turnstile':
+        specifier: ^1.5.5
+        version: 1.5.5(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@stream-io/video-react-sdk':
         specifier: ^1.40.2
         version: 1.40.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -424,6 +427,12 @@ packages:
 
   '@kurkle/color@0.3.4':
     resolution: {integrity: sha512-M5UknZPHRu3DEDWoipU6sE8PdkZ6Z/S+v4dD+Ke8IaNlpdSQah50lz1KtcFBa2vsdOnwbbnxJwVM4wty6udA5w==}
+
+  '@marsidev/react-turnstile@1.5.5':
+    resolution: {integrity: sha512-+EtXbmsJwlRuIUruLb3UBAakpW0wFGeA17QQp0uG8Mv+Zh8MXktZT68P5HS2g1ssfeRd2+BZGupOE/F4KGajFQ==}
+    peerDependencies:
+      react: ^17.0.2 || ^18.0.0 || ^19.0
+      react-dom: ^17.0.2 || ^18.0.0 || ^19.0
 
   '@mediapipe/tasks-vision@0.10.35':
     resolution: {integrity: sha512-HOvadwVRE6JC+45nyYhmnywnr5h/J8KZvOeUNVOG9q/0875pZgItznFB9bRTvLc264YSJqiZ1NsIpCStJw/egg==}
@@ -2096,6 +2105,11 @@ snapshots:
       '@jridgewell/sourcemap-codec': 1.5.5
 
   '@kurkle/color@0.3.4': {}
+
+  '@marsidev/react-turnstile@1.5.5(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
 
   '@mediapipe/tasks-vision@0.10.35': {}
 

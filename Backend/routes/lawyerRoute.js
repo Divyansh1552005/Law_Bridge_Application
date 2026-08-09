@@ -1,6 +1,7 @@
 import express from "express";
 import authLawyer from "../middleware/authLawyer.js";
 import { routeLimiter } from "../middleware/rateLimiter.js";
+import { verifyTurnstile } from "../middleware/verifyTurnstile.js";
 import {
   changeAvailability,
   getLawyerList,
@@ -20,7 +21,7 @@ const LawyerRouter = express.Router();
 
 LawyerRouter.post("/change-availability", authLawyer, changeAvailability);
 LawyerRouter.get("/list", getLawyerList);
-LawyerRouter.post("/login", routeLimiter(5, 60), lawyerLogin);
+LawyerRouter.post("/login", routeLimiter(5, 60), verifyTurnstile, lawyerLogin);
 LawyerRouter.post("/refresh", refreshLawyerAccessToken);
 LawyerRouter.post("/logout", logoutLawyer);
 LawyerRouter.post("/cancel-appointment", authLawyer, cancelAppointmentByLawyer);

@@ -6,7 +6,7 @@ const faqs = [
   {
     question: "How do I book an appointment with a lawyer?",
     answer:
-      "Simply browse through our list of trusted lawyers, choose your preferred specialist, and click on 'Book Appointment'. You can schedule a video or in-person consultation securely.",
+      "Simply browse through our list of trusted lawyers, choose your preferred specialist, and click on the 'Book Appointment'. You can schedule a video or in-person consultation securely.",
   },
   {
     question: "Can I chat with the AI Legal Assistant for free?",

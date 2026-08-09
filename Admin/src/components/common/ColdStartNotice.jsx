@@ -51,7 +51,7 @@ const ColdStartNotice = () => {
 
         {/* Content */}
         <p className="text-gray-600 text-sm mb-3 leading-relaxed">
-          Our free servers sleep when inactive. Click the links below to wake
+          Our free servers sleep when they are inactive. Click the links below to wake
           them up, then wait 1-2 minutes before using the app.
         </p>
 

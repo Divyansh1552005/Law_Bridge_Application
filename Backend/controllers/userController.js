@@ -673,11 +673,12 @@ export const updateUserProfile = async (req, res) => {
       updates.dob = dob;
     if (gender !== undefined) updates.gender = gender;
 
-    // handling address
+    // handling address — only the three known string fields are ever persisted
     if (address !== undefined) {
+      let rawAddress = address;
       if (typeof address === "string") {
         try {
-          updates.address = JSON.parse(address);
+          rawAddress = JSON.parse(address);
         } catch {
           return res.status(400).json({
             success: false,
@@ -685,9 +686,22 @@ export const updateUserProfile = async (req, res) => {
               "Invalid address format. Address must be a valid JSON object",
           });
         }
-      } else {
-        updates.address = address;
       }
+      if (
+        rawAddress === null ||
+        typeof rawAddress !== "object" ||
+        Array.isArray(rawAddress)
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid address format. Address must be a valid JSON object",
+        });
+      }
+      updates.address = {
+        Location: String(rawAddress.Location ?? ""),
+        City: String(rawAddress.City ?? ""),
+        State: String(rawAddress.State ?? ""),
+      };
     }
 
     // img handling — client ne already Cloudinary pe seedha upload kar diya (presigned flow)

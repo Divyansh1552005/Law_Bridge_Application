@@ -235,7 +235,10 @@ export const getAllAppointments = async (req, res) => {
 
     // archived (old cancelled/completed) appointments hidden from the default view
     const query = { archived: { $ne: true } };
-    const { status, lawyer, sort } = req.query;
+    // req.query values can be arrays/objects (qs) — force plain strings before use in the query
+    const status = String(req.query.status ?? "");
+    const lawyer = String(req.query.lawyer ?? "");
+    const sort = String(req.query.sort ?? "");
 
     if (status) {
       if (status === "cancelled") {
@@ -249,7 +252,7 @@ export const getAllAppointments = async (req, res) => {
     }
 
     if (lawyer && lawyer !== "all") {
-      query["lawyerData.name"] = lawyer;
+      query["lawyerData.name"] = { $eq: lawyer };
     }
 
     const sortOrder = sort === "asc" ? 1 : -1;

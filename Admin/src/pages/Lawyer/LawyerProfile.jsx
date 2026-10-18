@@ -6,6 +6,7 @@ import api from "../../api/axiosClient";
 import Loader from "../../components/common/Loader";
 import { Pencil, Save, X } from "lucide-react";
 import { uploadToCloudinaryDirect } from "../../utils/directCloudinaryUpload";
+import { safeImageSrc } from "../../utils/safeImageSrc";
 
 const LawyerProfile = () => {
   const { profileData, setProfileData, getProfileData } =
@@ -110,9 +111,9 @@ const LawyerProfile = () => {
         <div className="relative inline-block shrink-0">
           <label htmlFor="profile-image">
             <img
-              src={
-                imageFile ? URL.createObjectURL(imageFile) : profileData.image
-              }
+              src={safeImageSrc(
+                imageFile ? URL.createObjectURL(imageFile) : profileData.image,
+              )}
               alt={profileData.name}
               className={`w-32 h-32 sm:w-40 sm:h-40 rounded-xl object-cover object-top bg-gray-100 ${isEdit ? "cursor-pointer opacity-80 hover:opacity-100 transition-opacity" : ""}`}
             />

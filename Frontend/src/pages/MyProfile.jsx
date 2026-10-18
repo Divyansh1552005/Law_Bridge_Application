@@ -16,6 +16,7 @@ import { KeyRound, Shield, Trash2, Download, FileText, AlertTriangle } from "luc
 import Setup2FAModal from "../components/two_fa/Setup2FAModal";
 import Verify2FAModal from "../components/two_fa/Verify2FAModal";
 import Disable2FAModal from "../components/two_fa/Disable2FAModal";
+import { safeImageSrc } from "../utils/safeImageSrc";
 
 /* ================= IMAGE VALIDATION CONFIG ================= */
 const ALLOWED_TYPES = ["image/jpeg", "image/png"];
@@ -312,7 +313,7 @@ const MyProfile = () => {
               <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start mb-10 pb-8 border-b border-gray-200">
                 <label className={`relative group flex-shrink-0 ${isEdit ? "cursor-pointer" : ""}`}>
                   <img
-                    src={image ? URL.createObjectURL(image) : userData.image}
+                    src={safeImageSrc(image ? URL.createObjectURL(image) : userData.image)}
                     className="w-28 h-28 md:w-32 md:h-32 rounded-full object-cover ring-4 ring-primary/30 shadow-md"
                     alt="Profile"
                   />

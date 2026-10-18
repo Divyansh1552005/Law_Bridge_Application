@@ -4,6 +4,7 @@ import re
 import sys
 import traceback
 from pathlib import Path
+from urllib.parse import urlparse
 
 import requests
 from fastapi import FastAPI, Header, HTTPException
@@ -104,6 +105,17 @@ class UploadDocumentRequest(BaseModel):
     filename: str
     signed_url: str
     public_id: str
+
+
+# signed_url sirf Cloudinary delivery host se hi fetch hoga (SSRF protection)
+ALLOWED_DOCUMENT_HOSTS = {"api.cloudinary.com", "res.cloudinary.com"}
+
+
+def _validate_signed_url(url: str) -> str:
+    parsed = urlparse(url)
+    if parsed.scheme != "https" or parsed.hostname not in ALLOWED_DOCUMENT_HOSTS:
+        raise ValueError("signed_url must be an https Cloudinary delivery URL")
+    return url
 
 
 # LLM aur retriever initialize karo
@@ -312,7 +324,8 @@ async def upload_document(
         )
 
     try:
-        response = requests.get(body.signed_url, timeout=30)
+        signed_url = _validate_signed_url(body.signed_url)
+        response = requests.get(signed_url, timeout=30, allow_redirects=False)
         response.raise_for_status()
 
         result = process_uploaded_document(

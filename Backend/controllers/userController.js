@@ -706,7 +706,13 @@ export const updateUserProfile = async (req, res) => {
 
     // img handling — client ne already Cloudinary pe seedha upload kar diya (presigned flow)
     if (req.body.imageUrl) {
-      updates.image = req.body.imageUrl;
+      const imageUrl = String(req.body.imageUrl);
+      if (!imageUrl.startsWith("https://res.cloudinary.com/")) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid image URL" });
+      }
+      updates.image = imageUrl;
     }
 
     await userModel.findByIdAndUpdate(userId, updates, {

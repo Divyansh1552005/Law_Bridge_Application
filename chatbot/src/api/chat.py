@@ -4,7 +4,6 @@ import re
 import sys
 import traceback
 from pathlib import Path
-from urllib.parse import urlparse
 
 import requests
 from fastapi import FastAPI, Header, HTTPException
@@ -108,12 +107,14 @@ class UploadDocumentRequest(BaseModel):
 
 
 # signed_url sirf Cloudinary delivery host se hi fetch hoga (SSRF protection)
-ALLOWED_DOCUMENT_HOSTS = {"api.cloudinary.com", "res.cloudinary.com"}
+ALLOWED_DOCUMENT_URL_PREFIXES = (
+    "https://api.cloudinary.com/",
+    "https://res.cloudinary.com/",
+)
 
 
 def _validate_signed_url(url: str) -> str:
-    parsed = urlparse(url)
-    if parsed.scheme != "https" or parsed.hostname not in ALLOWED_DOCUMENT_HOSTS:
+    if not url.startswith(ALLOWED_DOCUMENT_URL_PREFIXES):
         raise ValueError("signed_url must be an https Cloudinary delivery URL")
     return url
 
